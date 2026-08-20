@@ -125,7 +125,18 @@ running the live browser workflow.
 - `pnpm test:e2e` — owner onboarding and core-record browser workflow
 - `pnpm build` — Vercel-compatible production build
 
+### Gate 0 local verification
+
+Gate 0 was fully verified against the local Supabase stack on August 20, 2026:
+
+- Local Supabase stack started successfully.
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 18 tenant-isolation assertions passing.
+- `pnpm test:e2e` passed with the owner workflow test passing 1/1.
+- The Playwright workflow covered signup → organization → dashboard → location →
+  department → employee.
+
 ## Status
 
-Gate 0 — Workforce Core is implemented. Scheduling and all later-gate behavior remain
-out of scope until Gate 0 is reviewed.
+Gate 0 — Workforce Core is implemented and fully verified locally. Scheduling and all
+later-gate behavior remain out of scope until Gate 1 is explicitly started.

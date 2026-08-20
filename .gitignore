@@ -1,0 +1,26 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# tests and builds
+/coverage
+/test-results
+/playwright-report
+/.next
+/out
+
+# local environment and Supabase state
+.env*
+!.env.example
+/supabase/.branches
+/supabase/.temp
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+pnpm-debug.log*
+.vercel
+*.tsbuildinfo
+next-env.d.ts

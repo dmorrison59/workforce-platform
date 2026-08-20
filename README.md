@@ -97,6 +97,35 @@ The first major product question is:
 
 That is the benchmark for the first usable version.
 
+## Gate 0 development setup
+
+Prerequisites: Node.js 20+, pnpm, Docker Desktop, and the Supabase CLI.
+
+1. Copy `.env.example` to `.env.local`.
+2. Run `pnpm install`.
+3. Run `pnpm db:start`, then `pnpm db:reset`.
+4. Put the local Supabase API URL and anon key printed by the CLI into `.env.local`.
+5. Run `pnpm dev`.
+
+For a hosted Supabase project, apply the migration in `supabase/migrations` and use
+that project's public URL and anon/publishable key. Never use a service-role key in
+the web application.
+
+Local seed data uses only fictional `.example` identities and deliberately does not
+include a working login password. Use the normal sign-up workflow for a local owner.
+Set `PLAYWRIGHT_TEST_PASSWORD` only in your uncommitted local environment before
+running the live browser workflow.
+
+## Verification
+
+- `pnpm typecheck` — strict TypeScript
+- `pnpm lint` — ESLint
+- `pnpm test` — unit tests
+- `pnpm test:db` — permanent pgTAP RLS/tenant-isolation suite (local Supabase required)
+- `pnpm test:e2e` — owner onboarding and core-record browser workflow
+- `pnpm build` — Vercel-compatible production build
+
 ## Status
 
-Architecture established. Application implementation has not started yet.
+Gate 0 — Workforce Core is implemented. Scheduling and all later-gate behavior remain
+out of scope until Gate 0 is reviewed.

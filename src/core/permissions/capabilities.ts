@@ -10,6 +10,9 @@ export const capabilities = [
   "department.view",
   "department.manage",
   "settings.manage",
+  "schedule.view",
+  "schedule.manage",
+  "schedule.publish",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

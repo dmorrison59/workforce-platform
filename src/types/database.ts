@@ -10,6 +10,8 @@ type RowTable<Row, Insert = Partial<Row>, Update = Partial<Insert>> = {
 export type MembershipRole = "owner" | "manager" | "employee";
 export type MembershipStatus = "active" | "invited" | "suspended";
 export type EmploymentStatus = "active" | "inactive" | "terminated";
+export type ScheduleStatus = "draft" | "published";
+export type ShiftStatus = "draft" | "published" | "open" | "completed" | "cancelled";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -101,6 +103,37 @@ export interface OrganizationModule extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface Schedule extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  location_id: string;
+  week_start: string;
+  status: ScheduleStatus;
+  published_at: string | null;
+  published_by: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Shift extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  schedule_id: string;
+  location_id: string;
+  department_id: string;
+  role_id: string | null;
+  employee_id: string | null;
+  start_at: string;
+  end_at: string;
+  break_minutes: number;
+  status: ShiftStatus;
+  notes: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -112,9 +145,15 @@ export interface Database {
       departments: RowTable<Department, Omit<Department, "id" | "created_at" | "updated_at" | "location_id" | "active"> & { id?: string; location_id?: string | null; active?: boolean; created_at?: string; updated_at?: string }>;
       roles: RowTable<Role>;
       organization_modules: RowTable<OrganizationModule>;
+      schedules: RowTable<Schedule>;
+      shifts: RowTable<Shift>;
     };
     Views: { [_ in never]: never };
     Functions: {
+      current_profile_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string | null;
+      };
       create_organization: {
         Args: { organization_name: string; organization_slug: string; organization_timezone: string };
         Returns: string;
@@ -137,11 +176,71 @@ export interface Database {
         Args: { target_organization_id: string; requested_capability: string };
         Returns: boolean;
       };
+      current_employee_id: {
+        Args: { target_organization_id: string };
+        Returns: string | null;
+      };
+      create_weekly_schedule: {
+        Args: { target_organization_id: string; target_location_id: string; target_week_start: string };
+        Returns: string;
+      };
+      create_schedule_shift: {
+        Args: {
+          target_schedule_id: string;
+          target_department_id: string;
+          target_role_id: string | null;
+          target_employee_id: string | null;
+          shift_start_local: string;
+          shift_end_local: string;
+          shift_break_minutes?: number;
+          shift_notes?: string;
+        };
+        Returns: string;
+      };
+      update_schedule_shift: {
+        Args: {
+          target_shift_id: string;
+          target_department_id: string;
+          target_role_id: string | null;
+          target_employee_id: string | null;
+          shift_start_local: string;
+          shift_end_local: string;
+          shift_break_minutes: number;
+          shift_notes: string;
+        };
+        Returns: undefined;
+      };
+      delete_schedule_shift: {
+        Args: { target_shift_id: string };
+        Returns: undefined;
+      };
+      assign_schedule_shift: {
+        Args: { target_shift_id: string; target_employee_id: string };
+        Returns: undefined;
+      };
+      remove_schedule_shift_employee: {
+        Args: { target_shift_id: string };
+        Returns: undefined;
+      };
+      publish_weekly_schedule: {
+        Args: { target_schedule_id: string };
+        Returns: undefined;
+      };
+      copy_schedule_shift: {
+        Args: { source_shift_id: string; target_local_date: string };
+        Returns: string;
+      };
+      copy_schedule_week: {
+        Args: { source_schedule_id: string; target_week_start: string };
+        Returns: string;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
       membership_status: MembershipStatus;
       employment_status: EmploymentStatus;
+      schedule_status: ScheduleStatus;
+      shift_status: ShiftStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

@@ -5,6 +5,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    pool: "threads",
+    maxWorkers: 1,
   },
   resolve: {
     alias: { "@": new URL("./src", import.meta.url).pathname },

@@ -25,5 +25,5 @@ export function redirectWithMessage(
   message: string,
 ): never {
   const params = new URLSearchParams({ [kind]: message });
-  redirect(`${path}?${params.toString()}`);
+  redirect(`${path}${path.includes("?") ? "&" : "?"}${params.toString()}`);
 }

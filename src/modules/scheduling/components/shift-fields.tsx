@@ -47,7 +47,10 @@ export function ShiftFields({
         <label htmlFor="notes">Notes</label>
         <textarea id="notes" name="notes" rows={3} maxLength={2000} defaultValue={defaults?.notes} />
       </div>
+      <label className="check-field">
+        <input type="checkbox" name="overrideWarnings" />
+        Save despite availability or approved time-off warnings
+      </label>
     </>
   );
 }
-

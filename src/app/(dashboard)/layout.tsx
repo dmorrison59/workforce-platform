@@ -5,9 +5,12 @@ import { hasCapability } from "@/core/permissions/capabilities";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const context = await requireOrganization();
-  const [canManageSchedules, canViewSchedules] = await Promise.all([
+  const [canManageSchedules, canViewSchedules, canManageAvailability, canViewOwnTimeOff, canApproveTimeOff] = await Promise.all([
     hasCapability(context.organization.id, "schedule.manage"),
     hasCapability(context.organization.id, "schedule.view"),
+    hasCapability(context.organization.id, "availability.manage_self"),
+    hasCapability(context.organization.id, "timeoff.view_self"),
+    hasCapability(context.organization.id, "timeoff.approve"),
   ]);
   const navigation = [
     ["Dashboard", "/dashboard"],
@@ -16,6 +19,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ["Departments", "/departments"],
     ...(canManageSchedules ? [["Schedule", "/schedule"]] : []),
     ...(canViewSchedules ? [["My Schedule", "/my-schedule"]] : []),
+    ...(canManageAvailability ? [["My Availability", "/my-availability"]] : []),
+    ...(canViewOwnTimeOff ? [["Time Off", "/time-off"]] : []),
+    ...(canApproveTimeOff ? [["Time Off Requests", "/time-off-requests"]] : []),
     ["Settings", "/settings"],
   ];
   return (

@@ -21,7 +21,7 @@ export class FormValidationError extends Error {}
 
 export function redirectWithMessage(
   path: string,
-  kind: "error" | "message",
+  kind: "error" | "message" | "warning",
   message: string,
 ): never {
   const params = new URLSearchParams({ [kind]: message });

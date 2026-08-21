@@ -15,7 +15,7 @@ import {
 import { ShiftFields } from "@/modules/scheduling/components/shift-fields";
 import { addDays, formatShiftTime, formatWeekDay, localDateTimeValue, weekStartFor } from "@/modules/scheduling/lib/dates";
 
-type SearchParams = { week?: string; location?: string; error?: string; message?: string };
+type SearchParams = { week?: string; location?: string; error?: string; message?: string; warning?: string };
 
 export default async function SchedulePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const context = await requireOrganization();
@@ -57,7 +57,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHeader title="Weekly schedule" description={`${formatWeekDay(week)} – ${formatWeekDay(addDays(week, 6))}`} />
-      <MessageBanner error={params.error} message={params.message} />
+      <MessageBanner error={params.error} message={params.message} warning={params.warning} />
       <section className="panel schedule-toolbar">
         <div className="button-row">
           <Link className="button ghost" href={`/schedule?location=${locationId}&week=${addDays(week, -7)}`}>Previous week</Link>
@@ -168,4 +168,3 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
     </>
   );
 }
-

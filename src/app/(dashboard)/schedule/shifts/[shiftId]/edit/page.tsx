@@ -13,7 +13,7 @@ export default async function EditShiftPage({
   searchParams,
 }: {
   params: Promise<{ shiftId: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; warning?: string }>;
 }) {
   const context = await requireOrganization();
   if (!(await hasCapability(context.organization.id, "schedule.manage"))) redirect("/my-schedule");
@@ -36,7 +36,7 @@ export default async function EditShiftPage({
     <>
       <PageHeader title="Edit shift" description="Saving changes returns this schedule to draft status." />
       <section className="panel form-panel">
-        <MessageBanner error={messages.error} />
+        <MessageBanner error={messages.error} warning={messages.warning} />
         <form action={updateShiftAction} className="form-grid">
           <input type="hidden" name="shiftId" value={shift.id} />
           <input type="hidden" name="scheduleId" value={schedule.id} />
@@ -65,4 +65,3 @@ export default async function EditShiftPage({
     </>
   );
 }
-

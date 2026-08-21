@@ -29,7 +29,11 @@ async function mutation(formData: FormData, capability: "schedule.manage" | "sch
   try {
     await operation();
   } catch (error) {
-    redirectWithMessage(destination, "error", actionError(error));
+    redirectWithMessage(
+      destination,
+      error instanceof scheduling.SchedulingWarningError ? "warning" : "error",
+      actionError(error),
+    );
   }
   revalidatePath("/schedule");
   revalidatePath("/my-schedule");
@@ -47,8 +51,12 @@ export async function createScheduleAction(formData: FormData) {
 }
 
 export async function createShiftAction(formData: FormData) {
+  const context = await requireOrganization();
   const values = formValues(formData);
-  await mutation(formData, "schedule.manage", () => scheduling.createShift(values), "Shift created.");
+  await mutation(formData, "schedule.manage", () => scheduling.createShift({
+    ...values,
+    organizationId: context.organization.id,
+  }), "Shift created.");
 }
 
 export async function updateShiftAction(formData: FormData) {
@@ -57,9 +65,11 @@ export async function updateShiftAction(formData: FormData) {
   const context = await requireOrganization();
   await requireCapability(context.organization.id, "schedule.manage");
   try {
-    await scheduling.updateShift(values);
+    await scheduling.updateShift({ ...values, organizationId: context.organization.id });
   } catch (error) {
-    const params = new URLSearchParams({ error: actionError(error) });
+    const params = new URLSearchParams({
+      [error instanceof scheduling.SchedulingWarningError ? "warning" : "error"]: actionError(error),
+    });
     redirect(`/schedule/shifts/${String(values.shiftId)}/edit?${params}`);
   }
   revalidatePath("/schedule");

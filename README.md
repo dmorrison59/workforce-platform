@@ -42,23 +42,18 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 0 — Workforce Core**
+**Gate 2 — Employee Self-Service**
 
-The first implementation milestone is limited to:
+The current implementation includes:
 
-- Next.js / TypeScript foundation
-- Supabase authentication
-- Organizations
-- Organization memberships
-- Employees
-- Locations
-- Departments
-- Roles and permissions
-- Module registry
-- Row Level Security
-- Tenant-isolation tests
+- Gate 0 workforce core and tenant isolation
+- Gate 1 weekly scheduling, publishing, and My Schedule
+- Recurring employee availability with effective dates
+- Employee time-off requests and cancellation
+- Manager approval and denial
+- Availability and approved-time-off scheduling warnings with explicit override
 
-Scheduling must not be built until Gate 0 is complete and reviewed.
+Gate 3 coverage workflows remain out of scope until explicitly started.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -97,7 +92,7 @@ The first major product question is:
 
 That is the benchmark for the first usable version.
 
-## Gate 0 development setup
+## Local development setup
 
 Prerequisites: Node.js 20+, pnpm, Docker Desktop, and the Supabase CLI.
 
@@ -136,7 +131,20 @@ Gate 0 was fully verified against the local Supabase stack on August 20, 2026:
 - The Playwright workflow covered signup → organization → dashboard → location →
   department → employee.
 
+### Gate 2 local verification
+
+Gate 2 and all prior gates were verified against the local Supabase stack on August 21, 2026:
+
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 93 Gate 0–2 security assertions passing.
+- `pnpm test` passed with all 18 unit tests passing.
+- `pnpm test:e2e` passed with all three Gate 0–2 workflows passing.
+- TypeScript, ESLint, and the production build passed.
+- The Gate 2 workflow covered employee availability → time-off request → manager
+  approval → scheduling warnings → explicit manager override → employee status view.
+
 ## Status
 
-Gate 0 — Workforce Core is implemented and fully verified locally. Scheduling and all
-later-gate behavior remain out of scope until Gate 1 is explicitly started.
+Gate 2 — Employee Self-Service is implemented and fully verified locally. Gate 0 and
+Gate 1 regression suites remain green. Open shifts, shift swaps, and all Gate 3+
+behavior remain out of scope until Gate 3 is explicitly started.

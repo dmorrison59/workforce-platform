@@ -3,6 +3,7 @@ import { capabilities } from "@/core/permissions/capabilities";
 import { shiftSchema, weeklyScheduleSchema } from "@/modules/scheduling/validation/schemas";
 
 const validShift = {
+  organizationId: "10000000-0000-4000-8000-000000000000",
   scheduleId: "10000000-0000-4000-8000-000000000001",
   departmentId: "10000000-0000-4000-8000-000000000002",
   roleId: "",
@@ -11,6 +12,7 @@ const validShift = {
   endLocal: "2026-08-24T17:00",
   breakMinutes: "30",
   notes: "Front desk",
+  overrideWarnings: false,
 };
 
 describe("Gate 1 scheduling validation", () => {

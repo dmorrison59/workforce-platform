@@ -9,6 +9,26 @@ import {
   updateShiftSchema,
   weeklyScheduleSchema,
 } from "@/modules/scheduling/validation/schemas";
+import { getShiftAssignmentWarningsForEmployee } from "@/modules/scheduling/services/assignment-warnings";
+
+export class SchedulingWarningError extends Error {
+  constructor(public readonly warnings: string[]) {
+    super(warnings.join(" "));
+  }
+}
+
+async function requireWarningOverride(value: {
+  organizationId: string;
+  employeeId: string | null;
+  startLocal: string;
+  endLocal: string;
+  overrideWarnings: boolean;
+}) {
+  const employeeId = value.employeeId;
+  if (!employeeId || value.overrideWarnings) return;
+  const warnings = await getShiftAssignmentWarningsForEmployee({ ...value, employeeId });
+  if (warnings.length) throw new SchedulingWarningError(warnings);
+}
 
 function assertDatabaseResult(error: { message: string } | null) {
   if (error) throw new Error(error.message);
@@ -28,6 +48,7 @@ export async function createWeeklySchedule(input: unknown) {
 
 export async function createShift(input: unknown) {
   const value = shiftSchema.parse(input);
+  await requireWarningOverride(value);
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_schedule_shift", {
     target_schedule_id: value.scheduleId,
@@ -45,6 +66,7 @@ export async function createShift(input: unknown) {
 
 export async function updateShift(input: unknown) {
   const value = updateShiftSchema.parse(input);
+  await requireWarningOverride(value);
   const supabase = await createClient();
   const { error } = await supabase.rpc("update_schedule_shift", {
     target_shift_id: value.shiftId,

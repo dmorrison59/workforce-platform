@@ -15,6 +15,7 @@ export const weeklyScheduleSchema = z.object({
 });
 
 export const shiftSchema = z.object({
+  organizationId: uuid,
   scheduleId: uuid,
   departmentId: uuid,
   roleId: optionalUuid,
@@ -23,6 +24,7 @@ export const shiftSchema = z.object({
   endLocal: localDateTime,
   breakMinutes: z.coerce.number().int("Break must use whole minutes.").min(0, "Break cannot be negative."),
   notes: z.string().trim().max(2000, "Notes must be 2,000 characters or fewer."),
+  overrideWarnings: z.preprocess((value) => value === true || value === "on", z.boolean()),
 }).superRefine((value, context) => {
   if (value.endLocal <= value.startLocal) {
     context.addIssue({ code: "custom", path: ["endLocal"], message: "End time must be after start time." });

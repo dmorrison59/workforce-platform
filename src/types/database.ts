@@ -12,6 +12,7 @@ export type MembershipStatus = "active" | "invited" | "suspended";
 export type EmploymentStatus = "active" | "inactive" | "terminated";
 export type ScheduleStatus = "draft" | "published";
 export type ShiftStatus = "draft" | "published" | "open" | "completed" | "cancelled";
+export type TimeOffRequestStatus = "pending" | "approved" | "denied" | "cancelled";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -134,6 +135,36 @@ export interface Shift extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface EmployeeAvailability extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  employee_id: string;
+  day_of_week: number;
+  available: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeOffRequest extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  employee_id: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: TimeOffRequestStatus;
+  requested_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  manager_note: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -147,6 +178,8 @@ export interface Database {
       organization_modules: RowTable<OrganizationModule>;
       schedules: RowTable<Schedule>;
       shifts: RowTable<Shift>;
+      employee_availability: RowTable<EmployeeAvailability>;
+      time_off_requests: RowTable<TimeOffRequest>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -234,6 +267,43 @@ export interface Database {
         Args: { source_schedule_id: string; target_week_start: string };
         Returns: string;
       };
+      save_my_availability: {
+        Args: {
+          target_organization_id: string;
+          availability_day_of_week: number;
+          availability_available: boolean;
+          availability_start_time: string | null;
+          availability_end_time: string | null;
+          availability_effective_from: string;
+          availability_effective_until?: string | null;
+        };
+        Returns: string;
+      };
+      delete_my_availability: {
+        Args: { target_availability_id: string };
+        Returns: undefined;
+      };
+      create_my_time_off_request: {
+        Args: {
+          target_organization_id: string;
+          request_start_date: string;
+          request_end_date: string;
+          request_reason?: string;
+        };
+        Returns: string;
+      };
+      cancel_my_time_off_request: {
+        Args: { target_request_id: string };
+        Returns: undefined;
+      };
+      review_time_off_request: {
+        Args: {
+          target_request_id: string;
+          review_status: TimeOffRequestStatus;
+          review_note?: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
@@ -241,6 +311,7 @@ export interface Database {
       employment_status: EmploymentStatus;
       schedule_status: ScheduleStatus;
       shift_status: ShiftStatus;
+      time_off_request_status: TimeOffRequestStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

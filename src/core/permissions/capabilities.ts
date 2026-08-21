@@ -13,6 +13,11 @@ export const capabilities = [
   "schedule.view",
   "schedule.manage",
   "schedule.publish",
+  "availability.view",
+  "availability.manage_self",
+  "timeoff.request",
+  "timeoff.view_self",
+  "timeoff.approve",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

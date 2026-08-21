@@ -74,6 +74,7 @@ button { cursor: pointer; }
 .banner { border-radius: .65rem; padding: .75rem 1rem; margin: 1rem 0; font-size: .9rem; }
 .banner.error { background: #fef3f2; border: 1px solid #fecdca; color: #b42318; }
 .banner.success { background: #ecfdf3; border: 1px solid #abefc6; color: #067647; }
+.banner.warning { background: #fffaeb; border: 1px solid #fedf89; color: #93370d; }
 
 .dashboard-shell { min-height: 100vh; }
 .sidebar {
@@ -133,12 +134,29 @@ button { cursor: pointer; }
 .my-shift h2 { margin: .3rem 0 0; font-size: 1.3rem; }
 .my-shift p { margin: 0; padding-top: .75rem; border-top: 1px solid var(--line); }
 .my-shift-details { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--muted); font-size: .9rem; }
+.check-field { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; font-weight: 700; }
+.check-field input { width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
+.availability-grid { display: grid; gap: 1rem; }
+.availability-card h2, .review-card h2 { margin: 0; }
+.availability-delete { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.availability-delete button, .text-button { border: 0; background: transparent; padding: 0; color: #b42318; font-weight: 700; }
+.self-service-grid { align-items: start; }
+.request-list { list-style: none; margin: 0; padding: 0; }
+.request-list li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.request-list li:last-child { border-bottom: 0; }
+.request-list p { margin: .5rem 0; }
+.request-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.review-list { display: grid; gap: 1rem; max-width: 58rem; }
+.review-card { display: grid; gap: 1rem; }
+.review-card p { margin: 0; }
+.manager-availability { margin-top: 1rem; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .main { padding: 2rem; }
   .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .section-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .availability-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 900px) {
   .dashboard-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); }

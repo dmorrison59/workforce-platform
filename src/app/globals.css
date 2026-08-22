@@ -173,6 +173,24 @@ button { cursor: pointer; }
 .manager-timesheets { margin-top: 1rem; }
 .weekly-totals { margin-bottom: 1rem; }
 .correction-form { border-top: 1px solid var(--line); padding-top: 1rem; }
+.labor-toolbar { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.labor-filters { display: grid; gap: .75rem; align-items: end; }
+.labor-metrics { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.metric-card { display: grid; gap: .35rem; }
+.metric-card span { color: var(--muted); font-weight: 650; }
+.metric-card strong { font-size: 1.6rem; }
+.metric-card small { color: var(--muted); line-height: 1.35; }
+.cost-hidden { border-style: dashed; }
+.labor-attention { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.labor-attention h2 { margin: 0; }
+.labor-list { display: grid; gap: 1rem; }
+.labor-row { display: grid; gap: 1rem; }
+.labor-row h2 { margin: .25rem 0 0; }
+.labor-row-metrics { display: grid; gap: .65rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.labor-row-metrics span { display: grid; gap: .2rem; color: var(--muted); }
+.labor-row-metrics strong { color: var(--ink); }
+.labor-flags { display: flex; flex-wrap: wrap; gap: .5rem; }
+.labor-note { max-width: 64rem; margin-top: 1rem; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -181,6 +199,9 @@ button { cursor: pointer; }
   .section-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .availability-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .clock-actions form, .clock-actions button { width: auto; }
+  .labor-filters { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+  .labor-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .labor-row-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (min-width: 900px) {
   .dashboard-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); }

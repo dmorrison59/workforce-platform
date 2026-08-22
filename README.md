@@ -2,7 +2,7 @@
 
 A modular workforce-management SaaS for small businesses with hourly employees, departments, crews, locations, and eventually field jobs.
 
-The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add labor intelligence, crews, jobs, GPS/field workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
+The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add crews, jobs, GPS/field workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
 
 ## Product Direction
 
@@ -42,7 +42,7 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 4 — Time Tracking**
+**Gate 5 — Labor Intelligence**
 
 The current implementation includes:
 
@@ -61,8 +61,14 @@ The current implementation includes:
 - Read-only employee weekly timesheets with gross, break, net, daily, and weekly calculations
 - Manager weekly time review, auditable corrections, and per-entry approval state
 - Tenant-scoped time-entry and break RLS with authoritative transactional operations
+- Weekly scheduled-versus-actual labor hours with location and department filters
+- Scheduled and actual labor cost using separately protected hourly compensation
+- Actual-minus-scheduled hour and cost variance
+- Operational near/over-40-hour overtime warnings without payroll calculations
+- Missing-wage, open-time, provisional-time, unlinked-time, and missing-actual signals
+- Wage-private Labor access that can show hours without querying or rendering cost data
 
-Gate 5 labor intelligence and all later modules remain out of scope.
+Gate 6 field-workforce functionality and all later modules remain out of scope.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -190,9 +196,31 @@ Gate 4 and all prior gates were verified against the local Supabase stack on Aug
 
 Scheduled shifts remain the planning record. Actual timestamps and breaks are stored
 separately, with nullable shift linkage available for scheduled-versus-actual comparison
-by a later labor module. Gate 4 does not calculate payroll, overtime pay, or labor cost.
+by the Labor module. Gate 4 itself does not calculate payroll, overtime pay, or labor cost.
+
+### Gate 5 local verification
+
+Gate 5 and all prior gates were verified against the local Supabase stack on August 22, 2026:
+
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 240 Gate 0–5 security assertions passing.
+- `pnpm test` passed with all 50 unit tests passing.
+- `pnpm test:e2e -- --workers=1` passed with all six Gate 0–5 workflows passing.
+- TypeScript, ESLint, and the production build passed.
+- The Gate 5 multi-user workflow covered hourly compensation → published schedule →
+  employee actual time → manager correction/approval → scheduled and actual cost →
+  variance → overtime warning → rendered cost restriction for a labor-hours-only user.
+
+Labor variance consistently means `actual − scheduled`. Completed or corrected entries
+that are not yet approved are included as provisional actual time and clearly flagged.
+The overtime threshold is a fixed operational warning at 40 hours, with “near” beginning
+at 35 hours; Gate 5 does not calculate overtime pay or jurisdiction-specific rules.
+
+The current compensation schema stores one current hourly rate per employee. Historical
+reports therefore use the current rate and may change after a wage update; Gate 5 does
+not claim historical payroll-grade wage accuracy or add compensation history.
 
 ## Status
 
-Gate 4 — Time Tracking is implemented and fully verified locally. Gate 0–3 regression
-suites remain green. Labor intelligence and all Gate 5+ behavior remain out of scope.
+Gate 5 — Labor Intelligence is implemented and fully verified locally. Gate 0–4 regression
+suites remain green. Field workforce and all Gate 6+ behavior remain out of scope.

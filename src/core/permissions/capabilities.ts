@@ -27,6 +27,8 @@ export const capabilities = [
   "timeclock.view_self",
   "timeclock.view",
   "timeclock.edit",
+  "labor.view",
+  "labor.view_cost",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

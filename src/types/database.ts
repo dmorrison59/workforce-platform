@@ -63,6 +63,15 @@ export interface Employee extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface EmployeeCompensation extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  employee_id: string;
+  hourly_rate: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Location extends Record<string, unknown> {
   id: string;
   organization_id: string;
@@ -96,6 +105,21 @@ export interface Role extends Record<string, unknown> {
   is_system: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface Permission extends Record<string, unknown> {
+  id: string;
+  capability: string;
+  description: string;
+  created_at: string;
+}
+
+export interface RolePermission extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  role_id: string;
+  permission_id: string;
+  created_at: string;
 }
 
 export interface OrganizationModule extends Record<string, unknown> {
@@ -241,9 +265,12 @@ export interface Database {
       organizations: RowTable<Organization>;
       organization_memberships: RowTable<OrganizationMembership>;
       employees: RowTable<Employee, Omit<Employee, "id" | "created_at" | "updated_at" | "profile_id"> & { id?: string; profile_id?: string | null; created_at?: string; updated_at?: string }>;
+      employee_compensation: RowTable<EmployeeCompensation>;
       locations: RowTable<Location, Omit<Location, "id" | "created_at" | "updated_at" | "latitude" | "longitude" | "active"> & { id?: string; latitude?: number | null; longitude?: number | null; active?: boolean; created_at?: string; updated_at?: string }>;
       departments: RowTable<Department, Omit<Department, "id" | "created_at" | "updated_at" | "location_id" | "active"> & { id?: string; location_id?: string | null; active?: boolean; created_at?: string; updated_at?: string }>;
       roles: RowTable<Role>;
+      permissions: RowTable<Permission>;
+      role_permissions: RowTable<RolePermission>;
       organization_modules: RowTable<OrganizationModule>;
       schedules: RowTable<Schedule>;
       shifts: RowTable<Shift>;

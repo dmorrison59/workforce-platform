@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { DashboardNavigation } from "@/components/dashboard-navigation";
 import { signOut } from "@/core/auth/actions";
 import { requireOrganization } from "@/core/auth/context";
 import { hasCapability } from "@/core/permissions/capabilities";
@@ -24,43 +26,46 @@ export default async function DashboardLayout({ children }: { children: React.Re
     hasCapability(context.organization.id, "field_clock.manage"),
   ]);
   const navigation = [
-    ["Dashboard", "/dashboard"],
-    ["Employees", "/employees"],
-    ["Locations", "/locations"],
-    ["Departments", "/departments"],
-    ...(canManageSchedules ? [["Schedule", "/schedule"]] : []),
-    ...(canViewSchedules ? [["My Schedule", "/my-schedule"]] : []),
-    ...(canManageAvailability ? [["My Availability", "/my-availability"]] : []),
-    ...(canViewOwnTimeOff ? [["Time Off", "/time-off"]] : []),
-    ...(canApproveTimeOff ? [["Time Off Requests", "/time-off-requests"]] : []),
-    ...(canViewOpenShifts ? [["Open Shifts", "/open-shifts"]] : []),
-    ...(canRequestSwaps ? [["Shift Swaps", "/shift-swaps"]] : []),
-    ...(canManageCoverage ? [["Coverage Requests", "/coverage-requests"]] : []),
-    ...(canUseTimeClock ? [["Time Clock", "/time-clock"]] : []),
-    ...(canViewOwnTimesheet ? [["My Timesheet", "/my-timesheet"]] : []),
-    ...(canReviewTimesheets ? [["Timesheets", "/timesheets"]] : []),
-    ...(canViewLabor ? [["Labor", "/labor"]] : []),
-    ...(canManageCrews ? [["Crews", "/crews"]] : []),
-    ...(canManageJobs ? [["Jobs", "/jobs"]] : []),
-    ...(canViewJobs && !canManageJobs ? [["My Jobs", "/my-jobs"]] : []),
-    ...(canManageFieldClock ? [["Field Clock", "/field-clock"]] : []),
-    ["Settings", "/settings"],
+    { label: "Dashboard", href: "/dashboard", group: "Workspace" },
+    { label: "Employees", href: "/employees", group: "Workforce" },
+    { label: "Locations", href: "/locations", group: "Workforce" },
+    { label: "Departments", href: "/departments", group: "Workforce" },
+    ...(canManageSchedules ? [{ label: "Schedule", href: "/schedule", group: "Management" }] : []),
+    ...(canViewSchedules ? [{ label: "My Schedule", href: "/my-schedule", group: "My work" }] : []),
+    ...(canManageAvailability ? [{ label: "My Availability", href: "/my-availability", group: "My work" }] : []),
+    ...(canViewOwnTimeOff ? [{ label: "Time Off", href: "/time-off", group: "My work" }] : []),
+    ...(canApproveTimeOff ? [{ label: "Time Off Requests", href: "/time-off-requests", group: "Management" }] : []),
+    ...(canViewOpenShifts ? [{ label: "Open Shifts", href: "/open-shifts", group: "My work" }] : []),
+    ...(canRequestSwaps ? [{ label: "Shift Swaps", href: "/shift-swaps", group: "My work" }] : []),
+    ...(canManageCoverage ? [{ label: "Coverage Requests", href: "/coverage-requests", group: "Management" }] : []),
+    ...(canUseTimeClock ? [{ label: "Time Clock", href: "/time-clock", group: "My work" }] : []),
+    ...(canViewOwnTimesheet ? [{ label: "My Timesheet", href: "/my-timesheet", group: "My work" }] : []),
+    ...(canReviewTimesheets ? [{ label: "Timesheets", href: "/timesheets", group: "Management" }] : []),
+    ...(canViewLabor ? [{ label: "Labor", href: "/labor", group: "Management" }] : []),
+    ...(canManageCrews ? [{ label: "Crews", href: "/crews", group: "Fieldwork" }] : []),
+    ...(canManageJobs ? [{ label: "Jobs", href: "/jobs", group: "Fieldwork" }] : []),
+    ...(canViewJobs && !canManageJobs ? [{ label: "My Jobs", href: "/my-jobs", group: "My work" }] : []),
+    ...(canManageFieldClock ? [{ label: "Field Clock", href: "/field-clock", group: "Fieldwork" }] : []),
+    { label: "Settings", href: "/settings", group: "Workspace" },
   ];
   return (
     <div className="dashboard-shell">
       <aside className="sidebar">
-        <div>
-          <div className="brand">Workforce Core</div>
-          <div className="org-name">{context.organization.name} · {context.roleName}</div>
+        <div className="sidebar-heading">
+          <Link className="brand-lockup" href="/dashboard" aria-label="Workforce Core dashboard">
+            <span className="brand-mark" aria-hidden="true">W</span>
+            <span className="brand">Workforce Core</span>
+          </Link>
+          <div className="org-name"><span>{context.organization.name}</span><span className="role-pill">{context.roleName}</span></div>
         </div>
-        <nav className="nav" aria-label="Main navigation">
-          {navigation.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
-        </nav>
+        <Suspense fallback={<nav className="nav" aria-label="Main navigation" />}>
+          <DashboardNavigation items={navigation} />
+        </Suspense>
         <div className="sidebar-footer">
           <form action={signOut}><button className="button ghost" type="submit">Sign out</button></form>
         </div>
       </aside>
-      <main className="main">{children}</main>
+      <main className="main"><div className="main-inner">{children}</div></main>
     </div>
   );
 }

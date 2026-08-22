@@ -19,9 +19,9 @@ export default async function DashboardPage() {
         <div className="stat"><span className="muted">Employees</span><span className="stat-value">{employees.count ?? 0}</span></div>
         <div className="stat"><span className="muted">Locations</span><span className="stat-value">{locations.count ?? 0}</span></div>
         <div className="stat"><span className="muted">Departments</span><span className="stat-value">{departments.count ?? 0}</span></div>
-        <div className="stat"><span className="muted">Role</span><span className="stat-value" style={{ fontSize: "1.35rem" }}>{context.roleName}</span></div>
+        <div className="stat"><span className="muted">Role</span><span className="stat-value compact">{context.roleName}</span></div>
       </section>
-      <section className="section-grid">
+      <section className="section-grid dashboard-actions">
         <div className="panel"><h2>Build your workforce</h2><p className="muted">Add employees without requiring them to have login accounts.</p><Link className="button" href="/employees/new">Add employee</Link></div>
         <div className="panel"><h2>Structure your workplace</h2><p className="muted">Create locations first, then optionally attach departments to them.</p><div className="button-row"><Link className="button secondary" href="/locations/new">Add location</Link><Link className="button secondary" href="/departments/new">Add department</Link></div></div>
       </section>

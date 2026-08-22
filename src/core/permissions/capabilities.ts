@@ -23,6 +23,10 @@ export const capabilities = [
   "open_shift.manage",
   "shift_swap.request",
   "shift_swap.approve",
+  "timeclock.use",
+  "timeclock.view_self",
+  "timeclock.view",
+  "timeclock.edit",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

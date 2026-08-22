@@ -14,6 +14,9 @@ export type ScheduleStatus = "draft" | "published";
 export type ShiftStatus = "draft" | "published" | "open" | "completed" | "cancelled";
 export type TimeOffRequestStatus = "pending" | "approved" | "denied" | "cancelled";
 export type CoverageRequestStatus = "pending" | "approved" | "denied" | "cancelled";
+export type TimeEntryStatus = "open" | "completed" | "corrected" | "cancelled";
+export type TimeEntrySource = "employee" | "manager" | "system";
+export type TimesheetReviewStatus = "unreviewed" | "approved";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -197,6 +200,40 @@ export interface ShiftSwapRequest extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface TimeEntry extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  employee_id: string;
+  shift_id: string | null;
+  location_id: string;
+  clock_in_at: string;
+  clock_out_at: string | null;
+  status: TimeEntryStatus;
+  source: TimeEntrySource;
+  review_status: TimesheetReviewStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  corrected_by: string | null;
+  corrected_at: string | null;
+  correction_note: string;
+  original_clock_in_at: string | null;
+  original_clock_out_at: string | null;
+  original_location_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeBreak extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  time_entry_id: string;
+  start_at: string;
+  end_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -214,6 +251,8 @@ export interface Database {
       time_off_requests: RowTable<TimeOffRequest>;
       open_shift_requests: RowTable<OpenShiftRequest>;
       shift_swap_requests: RowTable<ShiftSwapRequest>;
+      time_entries: RowTable<TimeEntry>;
+      time_breaks: RowTable<TimeBreak>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -386,6 +425,44 @@ export interface Database {
         };
         Returns: undefined;
       };
+      can_view_time_entry: {
+        Args: { target_entry_id: string; target_organization_id: string };
+        Returns: boolean;
+      };
+      clock_in: {
+        Args: {
+          target_organization_id: string;
+          target_location_id: string;
+          target_shift_id?: string | null;
+        };
+        Returns: string;
+      };
+      clock_out: {
+        Args: { target_organization_id: string };
+        Returns: undefined;
+      };
+      start_break: {
+        Args: { target_organization_id: string };
+        Returns: string;
+      };
+      end_break: {
+        Args: { target_organization_id: string };
+        Returns: undefined;
+      };
+      correct_time_entry: {
+        Args: {
+          target_entry_id: string;
+          corrected_location_id: string;
+          corrected_clock_in_local: string;
+          corrected_clock_out_local: string;
+          correction_reason: string;
+        };
+        Returns: undefined;
+      };
+      approve_time_entry: {
+        Args: { target_entry_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
@@ -395,6 +472,9 @@ export interface Database {
       shift_status: ShiftStatus;
       time_off_request_status: TimeOffRequestStatus;
       coverage_request_status: CoverageRequestStatus;
+      time_entry_status: TimeEntryStatus;
+      time_entry_source: TimeEntrySource;
+      timesheet_review_status: TimesheetReviewStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

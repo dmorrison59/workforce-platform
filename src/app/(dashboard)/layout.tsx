@@ -5,7 +5,7 @@ import { hasCapability } from "@/core/permissions/capabilities";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const context = await requireOrganization();
-  const [canManageSchedules, canViewSchedules, canManageAvailability, canViewOwnTimeOff, canApproveTimeOff, canViewOpenShifts, canRequestSwaps, canManageCoverage] = await Promise.all([
+  const [canManageSchedules, canViewSchedules, canManageAvailability, canViewOwnTimeOff, canApproveTimeOff, canViewOpenShifts, canRequestSwaps, canManageCoverage, canUseTimeClock, canViewOwnTimesheet, canReviewTimesheets] = await Promise.all([
     hasCapability(context.organization.id, "schedule.manage"),
     hasCapability(context.organization.id, "schedule.view"),
     hasCapability(context.organization.id, "availability.manage_self"),
@@ -14,6 +14,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     hasCapability(context.organization.id, "open_shift.view"),
     hasCapability(context.organization.id, "shift_swap.request"),
     hasCapability(context.organization.id, "open_shift.manage"),
+    hasCapability(context.organization.id, "timeclock.use"),
+    hasCapability(context.organization.id, "timeclock.view_self"),
+    hasCapability(context.organization.id, "timeclock.view"),
   ]);
   const navigation = [
     ["Dashboard", "/dashboard"],
@@ -28,6 +31,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ...(canViewOpenShifts ? [["Open Shifts", "/open-shifts"]] : []),
     ...(canRequestSwaps ? [["Shift Swaps", "/shift-swaps"]] : []),
     ...(canManageCoverage ? [["Coverage Requests", "/coverage-requests"]] : []),
+    ...(canUseTimeClock ? [["Time Clock", "/time-clock"]] : []),
+    ...(canViewOwnTimesheet ? [["My Timesheet", "/my-timesheet"]] : []),
+    ...(canReviewTimesheets ? [["Timesheets", "/timesheets"]] : []),
     ["Settings", "/settings"],
   ];
   return (

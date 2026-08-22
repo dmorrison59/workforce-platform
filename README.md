@@ -2,7 +2,7 @@
 
 A modular workforce-management SaaS for small businesses with hourly employees, departments, crews, locations, and eventually field jobs.
 
-The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add time tracking, labor intelligence, crews, jobs, GPS/field workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
+The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add labor intelligence, crews, jobs, GPS/field workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
 
 ## Product Direction
 
@@ -42,7 +42,7 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 3 — Coverage**
+**Gate 4 — Time Tracking**
 
 The current implementation includes:
 
@@ -56,8 +56,13 @@ The current implementation includes:
 - Employee open-shift requests with manager approval or denial
 - Employee shift-swap requests with manager approval or denial
 - Atomic, stale-safe assignment changes through the Scheduling service
+- Employee clock-in, break, and clock-out workflows with duplicate-transition protection
+- Nullable links from actual time entries to assigned published shifts without changing scheduled time
+- Read-only employee weekly timesheets with gross, break, net, daily, and weekly calculations
+- Manager weekly time review, auditable corrections, and per-entry approval state
+- Tenant-scoped time-entry and break RLS with authoritative transactional operations
 
-Gate 4 time tracking and all later modules remain out of scope.
+Gate 5 labor intelligence and all later modules remain out of scope.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -170,7 +175,24 @@ Shifts page, and the existing audit stream records the shift state change.
 Outbound email, push, or SMS delivery remains part of the later notifications
 expansion rather than Gate 3.
 
+### Gate 4 local verification
+
+Gate 4 and all prior gates were verified against the local Supabase stack on August 22, 2026:
+
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 200 Gate 0–4 security assertions passing.
+- `pnpm test` passed with all 37 unit tests passing, including elapsed-time and DST coverage.
+- `pnpm test:e2e` passed with all five Gate 0–4 workflows passing.
+- TypeScript, ESLint, and the production build passed.
+- The Gate 4 multi-user workflow covered published shift → employee clock-in → break
+  start/end → clock-out → My Timesheet → manager correction → manager approval →
+  corrected employee view.
+
+Scheduled shifts remain the planning record. Actual timestamps and breaks are stored
+separately, with nullable shift linkage available for scheduled-versus-actual comparison
+by a later labor module. Gate 4 does not calculate payroll, overtime pay, or labor cost.
+
 ## Status
 
-Gate 3 — Coverage is implemented and fully verified locally. Gate 0–2 regression
-suites remain green. Time tracking and all Gate 4+ behavior remain out of scope.
+Gate 4 — Time Tracking is implemented and fully verified locally. Gate 0–3 regression
+suites remain green. Labor intelligence and all Gate 5+ behavior remain out of scope.

@@ -156,6 +156,23 @@ button { cursor: pointer; }
 .coverage-history { max-width: 58rem; margin-top: 1rem; }
 .coverage-manager-grid { align-items: start; }
 .coverage-manager-grid > div > h2 { margin: 0 0 .75rem; }
+.time-clock-shell { display: grid; gap: 1rem; max-width: 58rem; }
+.clock-card { display: grid; gap: 1rem; text-align: center; padding: 1.5rem; }
+.clock-card h2 { margin: 0; font-size: clamp(2rem, 8vw, 3.25rem); }
+.clock-details, .time-metrics { display: flex; flex-wrap: wrap; justify-content: center; gap: .65rem 1.25rem; color: var(--muted); }
+.clock-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; }
+.clock-actions form, .clock-actions button, .clock-primary { width: 100%; }
+.today-time { margin-top: 0; }
+.timesheet-nav { margin-bottom: 1rem; }
+.timesheet-list { display: grid; gap: 1rem; max-width: 64rem; }
+.time-entry-card { display: grid; gap: 1rem; }
+.time-entry-card h2 { margin: .3rem 0 0; }
+.time-metrics { justify-content: flex-start; }
+.time-metrics span { background: #f8fafc; border-radius: .55rem; padding: .55rem .7rem; }
+.correction-note { border-left: .2rem solid var(--brand); margin: 0; padding: .5rem .75rem; background: #f8fafc; }
+.manager-timesheets { margin-top: 1rem; }
+.weekly-totals { margin-bottom: 1rem; }
+.correction-form { border-top: 1px solid var(--line); padding-top: 1rem; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -163,11 +180,12 @@ button { cursor: pointer; }
   .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .section-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .availability-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .clock-actions form, .clock-actions button { width: auto; }
 }
 @media (min-width: 900px) {
   .dashboard-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); }
   .sidebar { position: sticky; top: 0; height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
-  .nav { display: grid; overflow: visible; }
+  .nav { display: grid; min-height: 0; overflow-x: hidden; overflow-y: auto; padding-right: .25rem; }
   .sidebar-footer { display: block; margin-top: auto; }
 }
 @media (max-width: 640px) {

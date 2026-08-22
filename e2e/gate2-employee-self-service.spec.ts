@@ -6,6 +6,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 test.skip(!testPassword || !supabaseUrl || !anonKey, "Local Supabase and PLAYWRIGHT_TEST_PASSWORD are required.");
 
+async function signOut(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "Sign out" }).evaluate((element) => {
+    (element as HTMLButtonElement).form?.requestSubmit(element as HTMLButtonElement);
+  });
+  await expect(page).toHaveURL(/sign-in/);
+}
+
 function addDays(date: string, days: number) {
   const value = new Date(`${date}T12:00:00Z`);
   value.setUTCDate(value.getUTCDate() + days);
@@ -46,11 +53,13 @@ test("employee self-service feeds manager scheduling warnings", async ({ page })
   await page.getByLabel("State / province").fill("NY");
   await page.getByLabel("Postal code").fill("10001");
   await page.getByRole("button", { name: "Add location" }).click();
+  await expect(page.getByText("Self Service Office")).toBeVisible();
 
   await page.goto("/departments/new");
   await page.getByLabel("Department name").fill("Operations");
   await page.getByLabel("Location").selectOption({ label: "Self Service Office" });
   await page.getByRole("button", { name: "Add department" }).click();
+  await expect(page.getByText("Operations")).toBeVisible();
 
   await page.goto("/employees/new");
   await page.getByLabel("First name").fill("Emery");
@@ -113,7 +122,7 @@ test("employee self-service feeds manager scheduling warnings", async ({ page })
   const { error: linkError } = await ownerClient.from("employees").update({ profile_id: employeeProfileId }).eq("id", employee!.id);
   expect(linkError).toBeNull();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await page.getByLabel("Email").fill(employeeEmail);
   await page.getByLabel("Password").fill(testPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -135,7 +144,7 @@ test("employee self-service feeds manager scheduling warnings", async ({ page })
   await expect(page.getByText("pending", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Time Off Requests" })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await page.getByLabel("Email").fill(managerEmail);
   await page.getByLabel("Password").fill(testPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -149,6 +158,7 @@ test("employee self-service feeds manager scheduling warnings", async ({ page })
 
   await page.goto("/schedule");
   await page.getByRole("link", { name: "Next week" }).click();
+  await expect(page).toHaveURL(/week=/);
   await page.getByRole("button", { name: "Create draft schedule" }).click();
   await page.getByLabel("Department").selectOption({ label: "Operations" });
   await page.getByLabel("Employee").selectOption({ label: "Emery Employee" });
@@ -165,10 +175,11 @@ test("employee self-service feeds manager scheduling warnings", async ({ page })
   await expect(page.getByText("Shift created.")).toBeVisible();
   await expect(page.getByLabel("Weekly calendar").getByText("Emery Employee")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await page.getByLabel("Email").fill(employeeEmail);
   await page.getByLabel("Password").fill(testPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await page.goto("/time-off");
   await expect(page.getByText("approved", { exact: true })).toBeVisible();
   await expect(page.getByText("Manager note: Approved for appointment")).toBeVisible();

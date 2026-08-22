@@ -6,6 +6,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 test.skip(!testPassword || !supabaseUrl || !anonKey, "Local Supabase and PLAYWRIGHT_TEST_PASSWORD are required.");
 
+async function signOut(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "Sign out" }).evaluate((element) => {
+    (element as HTMLButtonElement).form?.requestSubmit(element as HTMLButtonElement);
+  });
+  await expect(page).toHaveURL(/sign-in/);
+}
+
 test("manager publishes a shift that the assigned employee can view", async ({ page }) => {
   test.setTimeout(90_000);
   const unique = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -34,11 +41,13 @@ test("manager publishes a shift that the assigned employee can view", async ({ p
   await page.getByLabel("State / province").fill("NY");
   await page.getByLabel("Postal code").fill("10001");
   await page.getByRole("button", { name: "Add location" }).click();
+  await expect(page.getByText("Scheduling Office")).toBeVisible();
 
   await page.goto("/departments/new");
   await page.getByLabel("Department name").fill("Operations");
   await page.getByLabel("Location").selectOption({ label: "Scheduling Office" });
   await page.getByRole("button", { name: "Add department" }).click();
+  await expect(page.getByText("Operations")).toBeVisible();
 
   await page.goto("/employees/new");
   await page.getByLabel("First name").fill("Emery");
@@ -113,7 +122,7 @@ test("manager publishes a shift that the assigned employee can view", async ({ p
   const { error: linkError } = await ownerClient.from("employees").update({ profile_id: employeeProfileId }).eq("id", employee!.id);
   expect(linkError).toBeNull();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await page.getByLabel("Email").fill(managerEmail);
   await page.getByLabel("Password").fill(testPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -122,6 +131,7 @@ test("manager publishes a shift that the assigned employee can view", async ({ p
 
   await page.goto("/schedule");
   await page.getByRole("link", { name: "Next week" }).click();
+  await expect(page).toHaveURL(/week=/);
   await page.getByRole("button", { name: "Create draft schedule" }).click();
   await expect(page.getByText("Draft schedule created.")).toBeVisible();
   await page.getByLabel("Department").selectOption({ label: "Operations" });
@@ -134,8 +144,7 @@ test("manager publishes a shift that the assigned employee can view", async ({ p
   await expect(page.getByText("Schedule published.")).toBeVisible();
   await expect(page.getByText("published", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page).toHaveURL(/sign-in/);
+  await signOut(page);
   await page.getByLabel("Email").fill(employeeEmail);
   await page.getByLabel("Password").fill(testPassword);
   await page.getByRole("button", { name: "Sign in" }).click();

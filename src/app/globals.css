@@ -216,6 +216,14 @@ button { cursor: pointer; }
 .my-job-card h2 { margin: .25rem 0 0; }
 .my-job-card p { margin: 0; }
 .job-time { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1rem; border-radius: .65rem; background: #f8fafc; padding: .75rem; }
+.coordinate-form, .override-form { border-top: 1px solid var(--line); padding-top: 1rem; }
+.field-clock-manager-grid { align-items: start; max-width: 64rem; }
+.field-clock-review { display: grid; gap: 1rem; margin-top: 1rem; max-width: 64rem; }
+.verification-metrics { display: flex; flex-wrap: wrap; gap: .6rem; }
+.verification-metrics span { display: grid; gap: .2rem; border-radius: .55rem; background: #f8fafc; padding: .55rem .7rem; color: var(--muted); }
+.verification-metrics strong { color: var(--ink); }
+.warning-status { background: #fffaeb; color: #93370d; }
+.geo-error { margin: 0; color: #b42318; font-weight: 650; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }

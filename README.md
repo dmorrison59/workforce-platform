@@ -42,7 +42,7 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 6 — Field Operations**
+**Gate 7 — GPS / Field Clock**
 
 The current implementation includes:
 
@@ -73,8 +73,15 @@ The current implementation includes:
 - Mobile-friendly My Jobs visibility for direct assignments and date-eligible crew membership
 - Terminal completed/cancelled jobs that remain visible but are read-only
 - Field jobs that remain independent from workforce shifts, actual time, and labor calculations
+- Optional one-time job-site location verification for employee-initiated clock-in
+- Manual job verification coordinates with configurable radius and device-accuracy limits
+- Server-authoritative Haversine distance decisions for assigned scheduled/in-progress jobs
+- Stored verification evidence for verified, outside-radius, low-accuracy, not-required, and overridden outcomes
+- Manager review and reason-required overrides that preserve the original failure result
+- Explicit employee clock-in after an approved override, using the same protected Gate 4 time-entry primitive
+- Tenant-scoped employee/manager verification visibility with no continuous or background tracking
 
-Gate 7 GPS/field-clock functionality and all later modules remain out of scope.
+Gate 8 messaging expansion and all later modules remain out of scope.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -248,7 +255,37 @@ Jobs do not create or update Gate 1 shifts, Gate 4 time entries, or Gate 5 labor
 geofencing, routing, messaging, customer CRM, estimating, invoicing, payroll, AI, job costing,
 photos, forms, and checklists remain outside Gate 6.
 
+### Gate 7 local verification
+
+Gate 7 and all prior gates were verified against the local Supabase stack on August 22, 2026:
+
+- `pnpm db:start` passed with Docker Desktop running.
+- `pnpm db:reset` passed with all Gate 0–7 migrations and local seed data.
+- `pnpm test:db` passed with all 365 Gate 0–7 security assertions passing, including
+  60 field-clock distance, eligibility, permission, RLS, tenant-isolation, failure, and override assertions.
+- `pnpm test` passed with all 70 unit tests passing, including Haversine distance and field-clock input boundaries.
+- `pnpm test:e2e` passed with all eight Gate 0–7 workflows passing.
+- TypeScript, ESLint, the production build, and `git diff --check` passed.
+- The Gate 7 workflow covered assigned field job with manual coordinates → enabled policy →
+  inside-radius verified clock-in → clock-out → outside-radius rejection without a time entry →
+  manager override with reason → explicit employee clock-in using the approved override.
+
+Gate 7 collects one browser geolocation reading only after an employee presses the field clock-in
+button. PostgreSQL recalculates the distance and decides the result; the browser cannot declare
+itself verified. Failed attempts remain evidence records and do not create time entries. An
+override preserves the initial failure, manager identity, time, and reason, and can be consumed
+only once by the same employee while the assigned job remains eligible.
+
+Device coordinates are user/device input, not cryptographic proof of presence. Gate 7 provides an
+operational check and makes no anti-spoofing claim. Event evidence is retained with the tenant's
+operational audit data until the organization is deleted; no travel history or extra location
+samples are created, and no separate automated retention policy is introduced in this gate.
+
+The optional policy defaults to disabled, so the standard Gate 4 office/time-clock workflow is
+unchanged. Gate 7 adds no continuous tracking, background tracking, route history, live map,
+routing, mileage, dispatch, messaging, payroll, or Gate 8 behavior.
+
 ## Status
 
-Gate 6 — Field Operations is implemented and fully verified locally. Gate 0–5 regression
-suites remain green. GPS/Field Clock and all Gate 7+ behavior remain out of scope.
+Gate 7 — GPS / Field Clock is implemented and fully verified locally. Gate 0–6 regression
+suites remain green. Messaging expansion and all Gate 8+ behavior remain out of scope.

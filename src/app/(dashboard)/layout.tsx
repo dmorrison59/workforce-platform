@@ -5,7 +5,7 @@ import { hasCapability } from "@/core/permissions/capabilities";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const context = await requireOrganization();
-  const [canManageSchedules, canViewSchedules, canManageAvailability, canViewOwnTimeOff, canApproveTimeOff, canViewOpenShifts, canRequestSwaps, canManageCoverage, canUseTimeClock, canViewOwnTimesheet, canReviewTimesheets, canViewLabor, canManageCrews, canViewJobs, canManageJobs] = await Promise.all([
+  const [canManageSchedules, canViewSchedules, canManageAvailability, canViewOwnTimeOff, canApproveTimeOff, canViewOpenShifts, canRequestSwaps, canManageCoverage, canUseTimeClock, canViewOwnTimesheet, canReviewTimesheets, canViewLabor, canManageCrews, canViewJobs, canManageJobs, canManageFieldClock] = await Promise.all([
     hasCapability(context.organization.id, "schedule.manage"),
     hasCapability(context.organization.id, "schedule.view"),
     hasCapability(context.organization.id, "availability.manage_self"),
@@ -21,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     hasCapability(context.organization.id, "crew.manage"),
     hasCapability(context.organization.id, "job.view"),
     hasCapability(context.organization.id, "job.manage"),
+    hasCapability(context.organization.id, "field_clock.manage"),
   ]);
   const navigation = [
     ["Dashboard", "/dashboard"],
@@ -42,6 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ...(canManageCrews ? [["Crews", "/crews"]] : []),
     ...(canManageJobs ? [["Jobs", "/jobs"]] : []),
     ...(canViewJobs && !canManageJobs ? [["My Jobs", "/my-jobs"]] : []),
+    ...(canManageFieldClock ? [["Field Clock", "/field-clock"]] : []),
     ["Settings", "/settings"],
   ];
   return (

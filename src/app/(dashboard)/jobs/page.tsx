@@ -3,6 +3,7 @@ import { MessageBanner } from "@/components/message-banner";
 import { PageHeader } from "@/components/page-header";
 import { requireOrganization } from "@/core/auth/context";
 import { hasCapability } from "@/core/permissions/capabilities";
+import { updateJobCoordinatesAction } from "@/modules/field-clock/actions/actions";
 import {
   assignJobAction,
   changeJobStatusAction,
@@ -46,6 +47,13 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
           return <article className="panel field-card" key={job.id}>
             <div className="request-heading"><div><span className="eyebrow">{job.customer_name}</span><h2>{job.job_name}</h2><p className="muted">{formatShiftDate(job.scheduled_start, context.organization.timezone)} · {formatShiftTime(job.scheduled_start, context.organization.timezone)}–{formatShiftTime(job.scheduled_end, context.organization.timezone)}</p></div><span className={terminal ? "status off" : "status"}>{statusLabels[job.status]}</span></div>
             <p className="job-address"><strong>{job.address}</strong></p>{job.notes ? <p className="job-notes">{job.notes}</p> : null}
+            {job.latitude !== null && job.longitude !== null ? <p className="muted">Verification point: {job.latitude}, {job.longitude}</p> : <p className="muted">No field-clock verification point configured.</p>}
+            {!terminal ? <form action={updateJobCoordinatesAction} className="form-grid coordinate-form">
+              <input type="hidden" name="jobId" value={job.id} />
+              <div className="two-col"><div className="field"><label htmlFor={`latitude-${job.id}`}>Verification latitude</label><input id={`latitude-${job.id}`} name="latitude" type="number" step="any" min={-90} max={90} defaultValue={job.latitude ?? ""} /></div><div className="field"><label htmlFor={`longitude-${job.id}`}>Verification longitude</label><input id={`longitude-${job.id}`} name="longitude" type="number" step="any" min={-180} max={180} defaultValue={job.longitude ?? ""} /></div></div>
+              <p className="help">Enter both coordinates for the job site, or clear both to disable job-site verification for this job.</p>
+              <button className="button secondary" type="submit">Save verification coordinates</button>
+            </form> : null}
             {!terminal ? <form action={updateJobAction} className="form-grid job-edit-form">
               <input type="hidden" name="jobId" value={job.id} />
               <div className="two-col"><div className="field"><label htmlFor={`customer-${job.id}`}>Customer name</label><input id={`customer-${job.id}`} name="customerName" defaultValue={job.customer_name} maxLength={160} required /></div><div className="field"><label htmlFor={`job-${job.id}`}>Job name</label><input id={`job-${job.id}`} name="jobName" defaultValue={job.job_name} maxLength={160} required /></div></div>

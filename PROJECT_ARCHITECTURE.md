@@ -218,6 +218,21 @@ Owns jobs and crew/employee job assignments.
 ### Module 11 — GPS / Field
 Uses time clock and job location data to enforce optional field rules such as clock-in radius.
 
+Gate 7 implements this boundary as an optional field-clock policy plus immutable attempt evidence.
+The browser requests one location reading only after an employee presses the verification button.
+The database revalidates tenant, employee, permission, assignment, job status, coordinates, radius,
+and device accuracy; PostgreSQL calculates Haversine distance and decides the outcome.
+
+Verified and not-required attempts can call the shared protected Gate 4 clock-in primitive. An
+outside-radius or low-accuracy result records evidence but creates no time entry. A permitted manager
+may override a failed result with a required reason; the original result remains stored, and the same
+employee must explicitly consume the approved override while the job remains eligible. An override
+cannot be replayed.
+
+GPS / Field does not own shifts, jobs, assignments, time-entry correction, labor calculation, or
+notifications. It does not collect continuous/background location, location history, routes, or a
+live map.
+
 ### Module 12 — AI Scheduling
 Produces suggestions only. AI must not write directly to production scheduling tables. Proposed schedules must pass normal validation and manager approval.
 
@@ -298,7 +313,7 @@ src/
     messaging/
     crews/
     jobs/
-    gps/
+    field-clock/
     ai-scheduling/
 
   components/

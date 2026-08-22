@@ -75,11 +75,13 @@ test("manager reviews weekly labor cost, variance, and overtime intelligence", a
   await page.getByLabel("State / province").fill("NY");
   await page.getByLabel("Postal code").fill("10001");
   await page.getByRole("button", { name: "Add location" }).click();
+  await expect(page.getByText("Labor Office")).toBeVisible();
 
   await page.goto("/departments/new");
   await page.getByLabel("Department name").fill("Operations");
   await page.getByLabel("Location").selectOption({ label: "Labor Office" });
   await page.getByRole("button", { name: "Add department" }).click();
+  await expect(page.getByText("Operations")).toBeVisible();
 
   for (const employee of [
     { first: "Emery", last: "Employee", email: employeeEmail, number: `P-${unique.slice(-5)}`, rate: "25" },
@@ -153,6 +155,7 @@ test("manager reviews weekly labor cost, variance, and overtime intelligence", a
 
   await page.goto("/schedule");
   await page.getByRole("button", { name: "Create draft schedule" }).click();
+  await expect(page.getByText("Draft schedule created.")).toBeVisible();
   await page.getByLabel("Department").selectOption({ label: "Operations" });
   await page.getByLabel("Employee").selectOption({ label: "Emery Employee" });
   await page.getByLabel("Start time").fill(`${today}T09:00`);
@@ -169,7 +172,7 @@ test("manager reviews weekly labor cost, variance, and overtime intelligence", a
   await page.getByLabel("Break minutes").fill("0");
   await page.getByLabel("Notes").fill(overtimeNote);
   await page.getByRole("button", { name: "Create shift" }).click();
-  await expect(page.getByText("Shift created.")).toBeVisible();
+  await expect(page.getByLabel("Weekly calendar").getByText(overtimeNote)).toBeVisible();
   const { data: overtimeShift } = await ownerClient.from("shifts").select("id").eq("organization_id", organization!.id).eq("notes", overtimeNote).single();
   for (let offset = 1; offset <= 4; offset += 1) {
     const { error } = await ownerClient.rpc("copy_schedule_shift", {

@@ -18,6 +18,7 @@ export type TimeEntryStatus = "open" | "completed" | "corrected" | "cancelled";
 export type TimeEntrySource = "employee" | "manager" | "system";
 export type TimesheetReviewStatus = "unreviewed" | "approved";
 export type JobStatus = "draft" | "scheduled" | "in_progress" | "completed" | "cancelled";
+export type FieldClockVerificationStatus = "verified" | "outside_radius" | "low_accuracy" | "not_required" | "overridden";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -291,6 +292,42 @@ export interface Job extends Record<string, unknown> {
   scheduled_end: string;
   status: JobStatus;
   notes: string;
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FieldClockSettings extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  enabled: boolean;
+  allowed_radius_m: number;
+  max_accuracy_m: number;
+  manager_override_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FieldClockVerification extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  employee_id: string;
+  job_id: string;
+  time_entry_id: string | null;
+  submitted_latitude: number;
+  submitted_longitude: number;
+  submitted_accuracy_m: number;
+  expected_latitude: number;
+  expected_longitude: number;
+  allowed_radius_m: number;
+  calculated_distance_m: number;
+  initial_status: FieldClockVerificationStatus;
+  status: FieldClockVerificationStatus;
+  attempted_at: string;
+  overridden_by: string | null;
+  overridden_at: string | null;
+  override_reason: string;
   created_at: string;
   updated_at: string;
 }
@@ -331,6 +368,8 @@ export interface Database {
       crew_members: RowTable<CrewMember>;
       jobs: RowTable<Job>;
       job_assignments: RowTable<JobAssignment>;
+      field_clock_settings: RowTable<FieldClockSettings>;
+      field_clock_verifications: RowTable<FieldClockVerification>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -600,6 +639,40 @@ export interface Database {
         Args: { target_assignment_id: string };
         Returns: undefined;
       };
+      field_clock_attempt: {
+        Args: {
+          target_organization_id: string;
+          target_job_id: string;
+          target_location_id: string;
+          target_shift_id: string | null;
+          submitted_latitude: number;
+          submitted_longitude: number;
+          submitted_accuracy_m: number;
+        };
+        Returns: Json;
+      };
+      field_clock_in_with_override: {
+        Args: { target_verification_id: string; target_location_id: string; target_shift_id: string | null };
+        Returns: string;
+      };
+      configure_field_clock: {
+        Args: {
+          target_organization_id: string;
+          field_clock_enabled: boolean;
+          field_allowed_radius_m: number;
+          field_max_accuracy_m: number;
+          field_manager_override_enabled: boolean;
+        };
+        Returns: undefined;
+      };
+      field_update_job_coordinates: {
+        Args: { target_job_id: string; target_latitude: number | null; target_longitude: number | null };
+        Returns: undefined;
+      };
+      override_field_clock_verification: {
+        Args: { target_verification_id: string; manager_override_reason: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
@@ -613,6 +686,7 @@ export interface Database {
       time_entry_source: TimeEntrySource;
       timesheet_review_status: TimesheetReviewStatus;
       job_status: JobStatus;
+      field_clock_verification_status: FieldClockVerificationStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

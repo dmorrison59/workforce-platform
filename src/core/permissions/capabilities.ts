@@ -34,6 +34,9 @@ export const capabilities = [
   "job.view",
   "job.manage",
   "job.assign",
+  "field_clock.use",
+  "field_clock.manage",
+  "field_clock.override",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

@@ -66,11 +66,13 @@ test("employee records actual time and a manager corrects and approves it", asyn
   await page.getByLabel("State / province").fill("NY");
   await page.getByLabel("Postal code").fill("10001");
   await page.getByRole("button", { name: "Add location" }).click();
+  await expect(page.getByText("Time Office")).toBeVisible();
 
   await page.goto("/departments/new");
   await page.getByLabel("Department name").fill("Operations");
   await page.getByLabel("Location").selectOption({ label: "Time Office" });
   await page.getByRole("button", { name: "Add department" }).click();
+  await expect(page.getByText("Operations")).toBeVisible();
 
   await page.goto("/employees/new");
   await page.getByLabel("First name").fill("Emery");

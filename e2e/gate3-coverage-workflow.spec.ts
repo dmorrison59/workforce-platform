@@ -13,6 +13,13 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 }
 
+async function signOut(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "Sign out" }).evaluate((element) => {
+    (element as HTMLButtonElement).form?.requestSubmit(element as HTMLButtonElement);
+  });
+  await expect(page).toHaveURL(/sign-in/);
+}
+
 function nextMonday() {
   const today = new Date();
   const day = today.getUTCDay();
@@ -48,11 +55,13 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await page.getByLabel("State / province").fill("NY");
   await page.getByLabel("Postal code").fill("10001");
   await page.getByRole("button", { name: "Add location" }).click();
+  await expect(page.getByText("Coverage Office")).toBeVisible();
 
   await page.goto("/departments/new");
   await page.getByLabel("Department name").fill("Operations");
   await page.getByLabel("Location").selectOption({ label: "Coverage Office" });
   await page.getByRole("button", { name: "Add department" }).click();
+  await expect(page.getByText("Operations")).toBeVisible();
 
   for (const employee of [
     { first: "Avery", last: "Employee", email: employeeAEmail, number: `A-${unique.slice(-5)}` },
@@ -108,10 +117,11 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
     expect(error).toBeNull();
   }
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, managerEmail);
   await page.goto("/schedule");
   await page.getByRole("link", { name: "Next week" }).click();
+  await expect(page).toHaveURL(/week=/);
   await page.getByRole("button", { name: "Create draft schedule" }).click();
   await page.getByLabel("Department").selectOption({ label: "Operations" });
   await page.getByLabel("Employee").selectOption({ label: "Avery Employee" });
@@ -124,7 +134,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await expect(page.getByText("Shift marked open.")).toBeVisible();
   await expect(page.getByLabel("Weekly calendar").getByText("Open shift")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, employeeBEmail);
   await page.goto("/my-availability");
   const monday = page.locator(".availability-card").filter({ has: page.getByRole("heading", { name: "Monday" }) });
@@ -133,7 +143,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await monday.getByRole("button", { name: "Save Monday" }).click();
   await expect(page.getByText("Availability saved.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, employeeAEmail);
   await page.goto("/open-shifts");
   const openShift = page.locator(".coverage-card").filter({ hasText: "Coverage Office" });
@@ -142,7 +152,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await expect(page.getByText("Open shift requested.")).toBeVisible();
   await expect(openShift.getByText("pending", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, managerEmail);
   await page.goto("/coverage-requests");
   const openRequest = page.locator(".open-request-card").filter({ hasText: "Avery Employee" });
@@ -150,7 +160,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await openRequest.getByRole("button", { name: "Approve open shift" }).click();
   await expect(page.getByText("Open-shift request reviewed.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, employeeAEmail);
   await page.goto("/my-schedule");
   await expect(page.getByText(shiftNote)).toBeVisible();
@@ -160,7 +170,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await swapShift.getByRole("button", { name: "Request swap" }).click();
   await expect(page.getByText("Shift swap requested.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, managerEmail);
   await page.goto("/coverage-requests");
   let swapRequest = page.locator(".swap-request-card").filter({ hasText: "Avery Employee → Blake Employee" });
@@ -171,7 +181,7 @@ test("manager fills an open shift and approves an employee swap", async ({ page 
   await swapRequest.getByRole("button", { name: "Approve swap" }).click();
   await expect(page.getByText("Shift-swap request reviewed.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, employeeBEmail);
   await page.goto("/my-schedule");
   await expect(page.getByText(shiftNote)).toBeVisible();

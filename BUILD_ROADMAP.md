@@ -214,16 +214,32 @@ STOP AND REVIEW.
 
 Add optional location-aware rules for field businesses.
 
-## Potential Features
+## Implemented Features
 
 - Job-site clock-in location
 - Configurable clock-in radius
 - Location verification
 - Field exceptions / manager override
+- One-time employee-initiated browser location capture
+- Server-authoritative Haversine verification
+- Device-accuracy rejection distinct from outside-radius rejection
+- Tenant-scoped verification evidence and reason-required override audit state
+- Explicit single-use employee clock-in after an approved override
+
+## Privacy and Boundary Rules
+
+- The feature defaults to disabled and standard Gate 4 clock-in remains unchanged.
+- Only employees assigned directly or through an effective crew membership can verify for a job.
+- Failed verification does not create a time entry.
+- GPS / Field uses the shared protected Gate 4 clock-in primitive; it does not implement a second time clock.
+- No continuous tracking, background tracking, route history, or live map is collected.
 
 ## Exit Criteria
 
 Location rules are optional, permission-aware, and do not break standard office/time-clock workflows.
+
+Verified locally on August 22, 2026 with 60 Gate 7 database assertions and the Playwright
+inside-radius → outside-radius → manager-override workflow. Gate 0–6 regression suites remained green.
 
 STOP AND REVIEW.
 

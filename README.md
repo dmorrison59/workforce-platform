@@ -42,7 +42,7 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 2 — Employee Self-Service**
+**Gate 3 — Coverage**
 
 The current implementation includes:
 
@@ -52,8 +52,12 @@ The current implementation includes:
 - Employee time-off requests and cancellation
 - Manager approval and denial
 - Availability and approved-time-off scheduling warnings with explicit override
+- Published shifts that managers can mark open without rebuilding the schedule
+- Employee open-shift requests with manager approval or denial
+- Employee shift-swap requests with manager approval or denial
+- Atomic, stale-safe assignment changes through the Scheduling service
 
-Gate 3 coverage workflows remain out of scope until explicitly started.
+Gate 4 time tracking and all later modules remain out of scope.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -143,8 +147,30 @@ Gate 2 and all prior gates were verified against the local Supabase stack on Aug
 - The Gate 2 workflow covered employee availability → time-off request → manager
   approval → scheduling warnings → explicit manager override → employee status view.
 
+### Gate 3 local verification
+
+Gate 3 and all prior gates were verified against the local Supabase stack on August 21, 2026:
+
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 142 Gate 0–3 security assertions passing.
+- `pnpm test` passed with all 26 unit tests passing.
+- `pnpm test:e2e` passed with all four Gate 0–3 workflows passing.
+- TypeScript, ESLint, and the production build passed.
+- The Gate 3 multi-user workflow covered publish → mark open → employee request →
+  manager approval → My Schedule → swap request → availability warning → explicit
+  manager override → reassignment to a distinct employee account.
+
+Gate 3 eligibility intentionally stays small: requesters and swap targets must be
+active employees in the same organization, and shifts must be in the required
+published/open state. A richer qualification matrix is future work; Gate 3 does
+not introduce a new qualification or marketplace subsystem.
+
+Eligible employees discover newly opened coverage on the authenticated Open
+Shifts page, and the existing audit stream records the shift state change.
+Outbound email, push, or SMS delivery remains part of the later notifications
+expansion rather than Gate 3.
+
 ## Status
 
-Gate 2 — Employee Self-Service is implemented and fully verified locally. Gate 0 and
-Gate 1 regression suites remain green. Open shifts, shift swaps, and all Gate 3+
-behavior remain out of scope until Gate 3 is explicitly started.
+Gate 3 — Coverage is implemented and fully verified locally. Gate 0–2 regression
+suites remain green. Time tracking and all Gate 4+ behavior remain out of scope.

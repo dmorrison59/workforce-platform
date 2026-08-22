@@ -22,7 +22,7 @@ function actionError(error: unknown) {
   return error instanceof Error ? error.message : "The scheduling change could not be completed.";
 }
 
-async function mutation(formData: FormData, capability: "schedule.manage" | "schedule.publish", operation: () => Promise<unknown>, success: string) {
+async function mutation(formData: FormData, capability: "schedule.manage" | "schedule.publish" | "open_shift.manage", operation: () => Promise<unknown>, success: string) {
   const context = await requireOrganization();
   await requireCapability(context.organization.id, capability);
   const destination = schedulePath(formData);
@@ -100,4 +100,8 @@ export async function copyWeekAction(formData: FormData) {
 
 export async function publishScheduleAction(formData: FormData) {
   await mutation(formData, "schedule.publish", () => scheduling.publishSchedule(formValues(formData)), "Schedule published.");
+}
+
+export async function markShiftOpenAction(formData: FormData) {
+  await mutation(formData, "open_shift.manage", () => scheduling.markShiftOpen(formValues(formData)), "Shift marked open.");
 }

@@ -10,6 +10,7 @@ import {
   createScheduleAction,
   createShiftAction,
   deleteShiftAction,
+  markShiftOpenAction,
   publishScheduleAction,
 } from "@/modules/scheduling/actions/actions";
 import { ShiftFields } from "@/modules/scheduling/components/shift-fields";
@@ -97,7 +98,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
                   {dayShifts.length ? dayShifts.map((shift) => (
                     <div className="shift-card" key={shift.id}>
                       <strong>{formatShiftTime(shift.start_at, context.organization.timezone)} – {formatShiftTime(shift.end_at, context.organization.timezone)}</strong>
-                      <span>{shift.employee_id ? employeeNames.get(shift.employee_id) : "Open assignment"}</span>
+                      <span>{shift.status === "open" ? "Open shift" : shift.employee_id ? employeeNames.get(shift.employee_id) : "Open assignment"}</span>
+                      {shift.status === "open" ? <span className="status">open</span> : null}
                       <span className="muted">{departmentNames.get(shift.department_id)} · {shift.break_minutes} min break</span>
                       {shift.notes ? <span className="shift-notes">{shift.notes}</span> : null}
                       <div className="shift-actions">
@@ -108,6 +110,12 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
                           <input type="hidden" name="returnWeek" value={week} />
                           <button type="submit">Delete</button>
                         </form>
+                        {schedule.status === "published" && shift.status === "published" ? <form action={markShiftOpenAction}>
+                          <input type="hidden" name="shiftId" value={shift.id} />
+                          <input type="hidden" name="returnLocation" value={locationId} />
+                          <input type="hidden" name="returnWeek" value={week} />
+                          <button type="submit">Mark open</button>
+                        </form> : null}
                       </div>
                       <form action={copyShiftAction} className="copy-shift-form">
                         <input type="hidden" name="shiftId" value={shift.id} />

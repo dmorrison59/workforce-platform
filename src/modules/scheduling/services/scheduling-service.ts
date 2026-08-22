@@ -10,6 +10,8 @@ import {
   weeklyScheduleSchema,
 } from "@/modules/scheduling/validation/schemas";
 import { getShiftAssignmentWarningsForEmployee } from "@/modules/scheduling/services/assignment-warnings";
+import { localDateTimeValue } from "@/modules/scheduling/lib/dates";
+import { coverageApprovalSchema } from "@/modules/coverage/validation/schemas";
 
 export class SchedulingWarningError extends Error {
   constructor(public readonly warnings: string[]) {
@@ -109,6 +111,74 @@ export async function publishSchedule(input: unknown) {
   const value = scheduleIdSchema.parse(input);
   const supabase = await createClient();
   const { error } = await supabase.rpc("publish_weekly_schedule", { target_schedule_id: value.scheduleId });
+  assertDatabaseResult(error);
+}
+
+export async function markShiftOpen(input: unknown) {
+  const value = shiftIdSchema.parse(input);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("scheduling_mark_shift_open", {
+    target_shift_id: value.shiftId,
+  });
+  assertDatabaseResult(error);
+}
+
+export async function approveOpenShiftRequest(input: unknown) {
+  const value = coverageApprovalSchema.parse(input);
+  const supabase = await createClient();
+  const { data: request, error: requestError } = await supabase
+    .from("open_shift_requests")
+    .select("organization_id, shift_id, employee_id")
+    .eq("id", value.requestId)
+    .single();
+  assertDatabaseResult(requestError);
+  const [{ data: shift, error: shiftError }, { data: organization, error: organizationError }] = await Promise.all([
+    supabase.from("shifts").select("start_at, end_at").eq("id", request!.shift_id).single(),
+    supabase.from("organizations").select("timezone").eq("id", request!.organization_id).single(),
+  ]);
+  assertDatabaseResult(shiftError);
+  assertDatabaseResult(organizationError);
+  await requireWarningOverride({
+    organizationId: request!.organization_id,
+    employeeId: request!.employee_id,
+    startLocal: localDateTimeValue(shift!.start_at, organization!.timezone),
+    endLocal: localDateTimeValue(shift!.end_at, organization!.timezone),
+    overrideWarnings: value.overrideWarnings,
+  });
+  const { error } = await supabase.rpc("scheduling_approve_open_shift_request", {
+    target_request_id: value.requestId,
+    review_note: value.managerNote,
+  });
+  assertDatabaseResult(error);
+}
+
+export async function approveShiftSwap(input: unknown) {
+  const value = coverageApprovalSchema.parse(input);
+  const supabase = await createClient();
+  const { data: request, error: requestError } = await supabase
+    .from("shift_swap_requests")
+    .select("organization_id, shift_id, target_employee_id")
+    .eq("id", value.requestId)
+    .single();
+  assertDatabaseResult(requestError);
+  if (!request!.target_employee_id) throw new Error("A target employee is required before a swap can be approved.");
+  const [{ data: shift, error: shiftError }, { data: organization, error: organizationError }] = await Promise.all([
+    supabase.from("shifts").select("start_at, end_at").eq("id", request!.shift_id).single(),
+    supabase.from("organizations").select("timezone").eq("id", request!.organization_id).single(),
+  ]);
+  assertDatabaseResult(shiftError);
+  assertDatabaseResult(organizationError);
+  await requireWarningOverride({
+    organizationId: request!.organization_id,
+    employeeId: request!.target_employee_id,
+    startLocal: localDateTimeValue(shift!.start_at, organization!.timezone),
+    endLocal: localDateTimeValue(shift!.end_at, organization!.timezone),
+    overrideWarnings: value.overrideWarnings,
+  });
+  const { error } = await supabase.rpc("scheduling_approve_shift_swap", {
+    target_request_id: value.requestId,
+    review_note: value.managerNote,
+  });
   assertDatabaseResult(error);
 }
 

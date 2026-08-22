@@ -150,6 +150,12 @@ button { cursor: pointer; }
 .review-card { display: grid; gap: 1rem; }
 .review-card p { margin: 0; }
 .manager-availability { margin-top: 1rem; }
+.coverage-list { display: grid; gap: 1rem; max-width: 58rem; }
+.coverage-card { display: grid; gap: 1rem; }
+.coverage-card h2 { margin: .3rem 0 0; }
+.coverage-history { max-width: 58rem; margin-top: 1rem; }
+.coverage-manager-grid { align-items: start; }
+.coverage-manager-grid > div > h2 { margin: 0 0 .75rem; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }

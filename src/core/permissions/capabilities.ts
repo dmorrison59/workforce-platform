@@ -18,6 +18,11 @@ export const capabilities = [
   "timeoff.request",
   "timeoff.view_self",
   "timeoff.approve",
+  "open_shift.view",
+  "open_shift.request",
+  "open_shift.manage",
+  "shift_swap.request",
+  "shift_swap.approve",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];

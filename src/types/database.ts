@@ -13,6 +13,7 @@ export type EmploymentStatus = "active" | "inactive" | "terminated";
 export type ScheduleStatus = "draft" | "published";
 export type ShiftStatus = "draft" | "published" | "open" | "completed" | "cancelled";
 export type TimeOffRequestStatus = "pending" | "approved" | "denied" | "cancelled";
+export type CoverageRequestStatus = "pending" | "approved" | "denied" | "cancelled";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -165,6 +166,37 @@ export interface TimeOffRequest extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface OpenShiftRequest extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  shift_id: string;
+  employee_id: string;
+  status: CoverageRequestStatus;
+  shift_updated_at: string;
+  requested_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  manager_note: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShiftSwapRequest extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  shift_id: string;
+  requesting_employee_id: string;
+  target_employee_id: string | null;
+  status: CoverageRequestStatus;
+  shift_updated_at: string;
+  requested_at: string;
+  approved_by: string | null;
+  approved_at: string | null;
+  manager_note: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -180,6 +212,8 @@ export interface Database {
       shifts: RowTable<Shift>;
       employee_availability: RowTable<EmployeeAvailability>;
       time_off_requests: RowTable<TimeOffRequest>;
+      open_shift_requests: RowTable<OpenShiftRequest>;
+      shift_swap_requests: RowTable<ShiftSwapRequest>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -304,6 +338,54 @@ export interface Database {
         };
         Returns: undefined;
       };
+      scheduling_mark_shift_open: {
+        Args: { target_shift_id: string };
+        Returns: undefined;
+      };
+      create_my_open_shift_request: {
+        Args: { target_organization_id: string; target_shift_id: string };
+        Returns: string;
+      };
+      cancel_my_open_shift_request: {
+        Args: { target_request_id: string };
+        Returns: undefined;
+      };
+      scheduling_approve_open_shift_request: {
+        Args: { target_request_id: string; review_note?: string };
+        Returns: undefined;
+      };
+      review_open_shift_request: {
+        Args: {
+          target_request_id: string;
+          review_status: CoverageRequestStatus;
+          review_note?: string;
+        };
+        Returns: undefined;
+      };
+      create_my_shift_swap_request: {
+        Args: {
+          target_organization_id: string;
+          target_shift_id: string;
+          requested_target_employee_id?: string | null;
+        };
+        Returns: string;
+      };
+      cancel_my_shift_swap_request: {
+        Args: { target_request_id: string };
+        Returns: undefined;
+      };
+      scheduling_approve_shift_swap: {
+        Args: { target_request_id: string; review_note?: string };
+        Returns: undefined;
+      };
+      review_shift_swap_request: {
+        Args: {
+          target_request_id: string;
+          review_status: CoverageRequestStatus;
+          review_note?: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
@@ -312,6 +394,7 @@ export interface Database {
       schedule_status: ScheduleStatus;
       shift_status: ShiftStatus;
       time_off_request_status: TimeOffRequestStatus;
+      coverage_request_status: CoverageRequestStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

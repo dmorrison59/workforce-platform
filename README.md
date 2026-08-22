@@ -1,8 +1,8 @@
 # Workforce Platform
 
-A modular workforce-management SaaS for small businesses with hourly employees, departments, crews, locations, and eventually field jobs.
+A modular workforce-management SaaS for small businesses with hourly employees, departments, crews, locations, and field jobs.
 
-The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add crews, jobs, GPS/field workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
+The product is designed to start simple: help a small business replace paper, spreadsheets, and schedule-related text messages with one reliable system. Later modules can add GPS workflows, messaging, and AI-assisted scheduling without turning the core into one tightly coupled application.
 
 ## Product Direction
 
@@ -42,7 +42,7 @@ See [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) for the full architecture
 
 ## Current Milestone
 
-**Gate 5 — Labor Intelligence**
+**Gate 6 — Field Operations**
 
 The current implementation includes:
 
@@ -67,8 +67,14 @@ The current implementation includes:
 - Operational near/over-40-hour overtime warnings without payroll calculations
 - Missing-wage, open-time, provisional-time, unlinked-time, and missing-actual signals
 - Wage-private Labor access that can show hours without querying or rendering cost data
+- Tenant-scoped crews with leaders, activation state, and auditable effective-dated membership
+- Tenant-scoped field jobs with customer, address, schedule, notes, and operational status
+- Validated crew and direct-employee job assignments through authoritative Field Operations services
+- Mobile-friendly My Jobs visibility for direct assignments and date-eligible crew membership
+- Terminal completed/cancelled jobs that remain visible but are read-only
+- Field jobs that remain independent from workforce shifts, actual time, and labor calculations
 
-Gate 6 field-workforce functionality and all later modules remain out of scope.
+Gate 7 GPS/field-clock functionality and all later modules remain out of scope.
 
 See [BUILD_ROADMAP.md](BUILD_ROADMAP.md) for milestone definitions.
 
@@ -220,7 +226,29 @@ The current compensation schema stores one current hourly rate per employee. His
 reports therefore use the current rate and may change after a wage update; Gate 5 does
 not claim historical payroll-grade wage accuracy or add compensation history.
 
+### Gate 6 local verification
+
+Gate 6 and all prior gates were verified against the local Supabase stack on August 22, 2026:
+
+- `pnpm db:reset` passed.
+- `pnpm test:db` passed with all 305 Gate 0–6 security assertions passing.
+- `pnpm test` passed with all 63 unit tests passing.
+- `pnpm test:e2e -- --workers=1` passed with all seven Gate 0–6 workflows passing.
+- TypeScript, ESLint, and the production build passed.
+- The Gate 6 multi-user workflow covered two linked employees → crew creation → effective
+  membership → scheduled job → crew assignment → crew-member visibility → unrelated-user
+  denial → direct assignment → completed status visibility.
+
+Crew membership dates are inclusive and evaluated against the job date in the organization
+timezone. Inactive crews cannot receive new work, overlapping membership periods and duplicate
+assignments are rejected, and all cross-tenant identifiers are revalidated at the database
+boundary. Completed and cancelled jobs are terminal and read-only.
+
+Jobs do not create or update Gate 1 shifts, Gate 4 time entries, or Gate 5 labor totals. GPS,
+geofencing, routing, messaging, customer CRM, estimating, invoicing, payroll, AI, job costing,
+photos, forms, and checklists remain outside Gate 6.
+
 ## Status
 
-Gate 5 — Labor Intelligence is implemented and fully verified locally. Gate 0–4 regression
-suites remain green. Field workforce and all Gate 6+ behavior remain out of scope.
+Gate 6 — Field Operations is implemented and fully verified locally. Gate 0–5 regression
+suites remain green. GPS/Field Clock and all Gate 7+ behavior remain out of scope.

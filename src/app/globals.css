@@ -191,6 +191,31 @@ button { cursor: pointer; }
 .labor-row-metrics strong { color: var(--ink); }
 .labor-flags { display: flex; flex-wrap: wrap; gap: .5rem; }
 .labor-note { max-width: 64rem; margin-top: 1rem; }
+.field-create-panel { max-width: 64rem; margin-bottom: 1rem; }
+.field-list { display: grid; gap: 1rem; max-width: 72rem; }
+.field-card { display: grid; gap: 1rem; }
+.field-card h2 { margin: .25rem 0 0; }
+.field-card h3 { margin: 0; font-size: 1rem; }
+.field-card p { margin: .35rem 0 0; }
+.field-inline-form { align-items: end; }
+.field-subsection, .job-edit-form { border-top: 1px solid var(--line); padding-top: 1rem; }
+.member-list { display: grid; gap: .6rem; margin-top: .75rem; }
+.member-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; border-radius: .6rem; background: #f8fafc; padding: .7rem; }
+.member-row span { display: grid; gap: .2rem; }
+.member-row small { color: var(--muted); }
+.member-row input { min-height: 2.4rem; border: 1px solid #cfd4dc; border-radius: .55rem; padding: .45rem .55rem; }
+.membership-form, .assignment-grid { border-top: 1px solid var(--line); padding-top: 1rem; }
+.field-history summary { cursor: pointer; color: var(--brand); font-weight: 700; }
+.assignment-grid { display: grid; gap: 1rem; }
+.assignment-grid .form-grid { margin: 0; }
+.job-address, .job-notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+.job-notes { border-left: .2rem solid var(--brand); background: #f8fafc; padding: .65rem .8rem; }
+.terminal-note, .field-note { max-width: 72rem; }
+.my-jobs-list { display: grid; gap: 1rem; max-width: 42rem; }
+.my-job-card { display: grid; gap: .9rem; }
+.my-job-card h2 { margin: .25rem 0 0; }
+.my-job-card p { margin: 0; }
+.job-time { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1rem; border-radius: .65rem; background: #f8fafc; padding: .75rem; }
 
 @media (min-width: 640px) {
   .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -202,6 +227,8 @@ button { cursor: pointer; }
   .labor-filters { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
   .labor-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .labor-row-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .field-inline-form { grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) auto; }
+  .assignment-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 900px) {
   .dashboard-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); }

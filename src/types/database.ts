@@ -17,6 +17,7 @@ export type CoverageRequestStatus = "pending" | "approved" | "denied" | "cancell
 export type TimeEntryStatus = "open" | "completed" | "corrected" | "cancelled";
 export type TimeEntrySource = "employee" | "manager" | "system";
 export type TimesheetReviewStatus = "unreviewed" | "approved";
+export type JobStatus = "draft" | "scheduled" | "in_progress" | "completed" | "cancelled";
 
 export interface Profile extends Record<string, unknown> {
   id: string;
@@ -258,6 +259,52 @@ export interface TimeBreak extends Record<string, unknown> {
   updated_at: string;
 }
 
+export interface Crew extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  name: string;
+  crew_leader_id: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CrewMember extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  crew_id: string;
+  employee_id: string;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Job extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  customer_name: string;
+  job_name: string;
+  location_id: string | null;
+  address: string;
+  scheduled_start: string;
+  scheduled_end: string;
+  status: JobStatus;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JobAssignment extends Record<string, unknown> {
+  id: string;
+  organization_id: string;
+  job_id: string;
+  crew_id: string | null;
+  employee_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -280,6 +327,10 @@ export interface Database {
       shift_swap_requests: RowTable<ShiftSwapRequest>;
       time_entries: RowTable<TimeEntry>;
       time_breaks: RowTable<TimeBreak>;
+      crews: RowTable<Crew>;
+      crew_members: RowTable<CrewMember>;
+      jobs: RowTable<Job>;
+      job_assignments: RowTable<JobAssignment>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -490,6 +541,65 @@ export interface Database {
         Args: { target_entry_id: string };
         Returns: undefined;
       };
+      employee_can_view_job: {
+        Args: { target_job_id: string; target_organization_id: string; target_scheduled_start: string };
+        Returns: boolean;
+      };
+      field_create_crew: {
+        Args: { target_organization_id: string; crew_name: string; target_crew_leader_id?: string | null };
+        Returns: string;
+      };
+      field_update_crew: {
+        Args: { target_crew_id: string; crew_name: string; target_crew_leader_id: string | null; crew_active: boolean };
+        Returns: undefined;
+      };
+      field_add_crew_member: {
+        Args: { target_crew_id: string; target_employee_id: string; membership_effective_from: string; membership_effective_until?: string | null };
+        Returns: string;
+      };
+      field_end_crew_membership: {
+        Args: { target_membership_id: string; membership_effective_until: string };
+        Returns: undefined;
+      };
+      field_create_job: {
+        Args: {
+          target_organization_id: string;
+          target_customer_name: string;
+          target_job_name: string;
+          target_location_id: string | null;
+          target_address: string;
+          target_scheduled_start_local: string;
+          target_scheduled_end_local: string;
+          target_status: JobStatus;
+          target_notes?: string;
+        };
+        Returns: string;
+      };
+      field_update_job: {
+        Args: {
+          target_job_id: string;
+          target_customer_name: string;
+          target_job_name: string;
+          target_location_id: string | null;
+          target_address: string;
+          target_scheduled_start_local: string;
+          target_scheduled_end_local: string;
+          target_notes: string;
+        };
+        Returns: undefined;
+      };
+      field_change_job_status: {
+        Args: { target_job_id: string; target_status: JobStatus };
+        Returns: undefined;
+      };
+      field_assign_job: {
+        Args: { target_job_id: string; target_crew_id?: string | null; target_employee_id?: string | null };
+        Returns: string;
+      };
+      field_unassign_job: {
+        Args: { target_assignment_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       membership_role: MembershipRole;
@@ -502,6 +612,7 @@ export interface Database {
       time_entry_status: TimeEntryStatus;
       time_entry_source: TimeEntrySource;
       timesheet_review_status: TimesheetReviewStatus;
+      job_status: JobStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

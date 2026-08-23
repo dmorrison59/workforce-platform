@@ -25,6 +25,12 @@ export async function createEmployee(formData: FormData) {
     employee_status: parsed.data.employmentStatus,
     employee_hire_date: parsed.data.hireDate,
     employee_hourly_rate: parsed.data.hourlyRate,
+    employee_street_address: parsed.data.streetAddress,
+    employee_address_line_2: parsed.data.addressLine2,
+    employee_city: parsed.data.city,
+    employee_state_province: parsed.data.stateProvince,
+    employee_postal_code: parsed.data.postalCode,
+    employee_country: parsed.data.country,
   });
   if (error) redirectWithMessage("/employees/new", "error", error.message);
   redirect("/employees?message=Employee+added");

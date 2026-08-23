@@ -59,6 +59,12 @@ export interface Employee extends Record<string, unknown> {
   last_name: string;
   email: string;
   phone: string | null;
+  street_address: string | null;
+  address_line_2: string | null;
+  city: string | null;
+  state_province: string | null;
+  postal_code: string | null;
+  country: string | null;
   employment_status: EmploymentStatus;
   hire_date: string | null;
   created_at: string;
@@ -348,7 +354,7 @@ export interface Database {
       profiles: RowTable<Profile>;
       organizations: RowTable<Organization>;
       organization_memberships: RowTable<OrganizationMembership>;
-      employees: RowTable<Employee, Omit<Employee, "id" | "created_at" | "updated_at" | "profile_id"> & { id?: string; profile_id?: string | null; created_at?: string; updated_at?: string }>;
+      employees: RowTable<Employee, Omit<Employee, "id" | "created_at" | "updated_at" | "profile_id" | "employee_number" | "phone" | "street_address" | "address_line_2" | "city" | "state_province" | "postal_code" | "country" | "employment_status" | "hire_date"> & { id?: string; profile_id?: string | null; employee_number?: string | null; phone?: string | null; street_address?: string | null; address_line_2?: string | null; city?: string | null; state_province?: string | null; postal_code?: string | null; country?: string | null; employment_status?: EmploymentStatus; hire_date?: string | null; created_at?: string; updated_at?: string }>;
       employee_compensation: RowTable<EmployeeCompensation>;
       locations: RowTable<Location, Omit<Location, "id" | "created_at" | "updated_at" | "latitude" | "longitude" | "active"> & { id?: string; latitude?: number | null; longitude?: number | null; active?: boolean; created_at?: string; updated_at?: string }>;
       departments: RowTable<Department, Omit<Department, "id" | "created_at" | "updated_at" | "location_id" | "active"> & { id?: string; location_id?: string | null; active?: boolean; created_at?: string; updated_at?: string }>;
@@ -392,6 +398,12 @@ export interface Database {
           employee_status?: EmploymentStatus;
           employee_hire_date?: string | null;
           employee_hourly_rate?: number | null;
+          employee_street_address?: string | null;
+          employee_address_line_2?: string | null;
+          employee_city?: string | null;
+          employee_state_province?: string | null;
+          employee_postal_code?: string | null;
+          employee_country?: string | null;
         };
         Returns: string;
       };

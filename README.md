@@ -139,6 +139,11 @@ include a working login password. Use the normal sign-up workflow for a local ow
 Set `PLAYWRIGHT_TEST_PASSWORD` only in your uncommitted local environment before
 running the live browser workflow.
 
+Employee address autocomplete is optional. Set `GEOAPIFY_API_KEY` in the server's
+uncommitted environment to enable Geoapify suggestions. The key is never sent to
+the browser, and employee addresses can always be entered manually when it is not
+configured or the provider is unavailable.
+
 ## Verification
 
 - `pnpm typecheck` — strict TypeScript

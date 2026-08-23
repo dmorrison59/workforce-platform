@@ -529,6 +529,31 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
 .stat > .muted { position: relative; z-index: 1; color: #64748b; font-size: .72rem; font-weight: 770; letter-spacing: .085em; text-transform: uppercase; }
 .stat-value { position: relative; z-index: 1; margin-top: .9rem; color: var(--ink-strong); font-size: clamp(2.15rem, 4vw, 2.7rem); font-weight: 830; line-height: 1; letter-spacing: -.055em; }
 .stat-value.compact { margin-top: 1rem; font-size: clamp(1.35rem, 2.4vw, 1.65rem); line-height: 1.15; letter-spacing: -.035em; }
+.stat-link { display: block; color: inherit; cursor: pointer; }
+.stat-link-label {
+  position: absolute;
+  z-index: 1;
+  bottom: 1rem;
+  left: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  color: #4f46e5;
+  font-size: .76rem;
+  font-weight: 760;
+  letter-spacing: .01em;
+}
+.stat-link-label svg { width: .95rem; height: .95rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; transition: transform 180ms ease; }
+.stat-link:focus-visible {
+  outline: 3px solid rgb(99 102 241 / 0.35);
+  outline-offset: 3px;
+  border-color: rgb(99 102 241 / 0.56);
+  box-shadow:
+    0 2px 4px rgb(15 23 42 / 0.05),
+    0 16px 34px rgb(30 41 59 / 0.11),
+    0 28px 58px rgb(79 70 229 / 0.08),
+    inset 0 1px 0 white;
+}
 .dashboard-actions { margin-top: 1.25rem; }
 .dashboard-actions .panel {
   border-color: rgb(148 163 184 / 0.28);
@@ -539,7 +564,7 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
     inset 0 1px 0 rgb(255 255 255 / 0.9);
 }
 @media (hover: hover) {
-  .stat:hover {
+  .stat-link:hover {
     transform: translateY(-3px);
     border-color: rgb(129 140 248 / 0.34);
     box-shadow:
@@ -548,6 +573,7 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
       0 28px 58px rgb(79 70 229 / 0.08),
       inset 0 1px 0 white;
   }
+  .stat-link:hover .stat-link-label svg { transform: translateX(2px); }
   .dashboard-actions .panel:hover {
     border-color: rgb(129 140 248 / 0.28);
     box-shadow:

@@ -22,6 +22,22 @@ test("owner completes signup through employee creation", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await expect(page.getByText("Owner", { exact: true }).first()).toBeVisible();
 
+  const totals = page.getByRole("region", { name: "Organization totals" });
+  await expect(totals.getByRole("link")).toHaveCount(3);
+  await expect(totals.getByText("Role", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Add employee" })).toHaveAttribute("href", "/employees/new");
+  await expect(page.getByRole("link", { name: "Add location" })).toHaveAttribute("href", "/locations/new");
+  await expect(page.getByRole("link", { name: "Add department" })).toHaveAttribute("href", "/departments/new");
+
+  await totals.getByRole("link", { name: /View employees/ }).click();
+  await expect(page).toHaveURL(/\/employees$/);
+  await page.goto("/dashboard");
+  await page.getByRole("region", { name: "Organization totals" }).getByRole("link", { name: /View locations/ }).click();
+  await expect(page).toHaveURL(/\/locations$/);
+  await page.goto("/dashboard");
+  await page.getByRole("region", { name: "Organization totals" }).getByRole("link", { name: /View departments/ }).click();
+  await expect(page).toHaveURL(/\/departments$/);
+
   await page.goto("/locations/new");
   await page.getByLabel("Location name").fill("Main Office");
   await page.getByLabel("Street address").fill("100 Test Avenue");

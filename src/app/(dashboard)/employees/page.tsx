@@ -3,15 +3,19 @@ import { MessageBanner } from "@/components/message-banner";
 import { PageHeader } from "@/components/page-header";
 import { requireOrganization, requireUser } from "@/core/auth/context";
 
-export default async function EmployeesPage({ searchParams }: { searchParams: Promise<{ message?: string }> }) {
+export default async function EmployeesPage({ searchParams }: { searchParams: Promise<{ message?: string; warning?: string; error?: string }> }) {
   const context = await requireOrganization();
   const { supabase } = await requireUser();
   const { data: employees } = await supabase.from("employees").select("id,employee_number,first_name,last_name,email,phone,street_address,address_line_2,city,state_province,postal_code,country,employment_status,hire_date").eq("organization_id", context.organization.id).order("last_name");
   const params = await searchParams;
   return (
     <>
-      <PageHeader title="Employees" description="Employee records are independent of authentication accounts." action={<Link className="button" href="/employees/new">Add employee</Link>} />
-      <MessageBanner message={params.message} />
+      <PageHeader
+        title="Employees"
+        description="Employee records are independent of authentication accounts."
+        action={<div className="button-row"><Link className="button ghost" href="/employees/new/wizard">Guided setup</Link><Link className="button" href="/employees/new">Add employee</Link></div>}
+      />
+      <MessageBanner error={params.error} warning={params.warning} message={params.message} />
       <section className="panel table-wrap">
         {employees?.length ? <table className="data-table"><thead><tr><th>Employee</th><th>Number</th><th>Contact</th><th>Address</th><th>Status</th><th>Hire date</th></tr></thead><tbody>{employees.map((employee) => {
           const address = [

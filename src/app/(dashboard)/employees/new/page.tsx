@@ -3,8 +3,8 @@ import { DatePickerField } from "@/components/date-picker-field";
 import { FormField, SelectField } from "@/components/form-field";
 import { MessageBanner } from "@/components/message-banner";
 import { PageHeader } from "@/components/page-header";
+import { StructuredAddressFields } from "@/components/structured-address-fields";
 import { createEmployee } from "@/core/employees/actions";
-import { AddressFields } from "@/core/employees/components/address-fields";
 
 export default async function NewEmployeePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const params = await searchParams;
@@ -30,7 +30,18 @@ export default async function NewEmployeePage({ searchParams }: { searchParams: 
           <fieldset className="employee-form-section">
             <legend>Address</legend>
             <p>Optional structured address details. Search for an address or enter it manually.</p>
-            <AddressFields />
+            <StructuredAddressFields
+              scope="employee"
+              fieldNames={{
+                streetAddress: "streetAddress",
+                addressLine2: "addressLine2",
+                city: "city",
+                stateProvince: "stateProvince",
+                postalCode: "postalCode",
+                country: "country",
+              }}
+              defaultCountry="United States"
+            />
           </fieldset>
 
           <fieldset className="employee-form-section">

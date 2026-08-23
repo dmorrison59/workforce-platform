@@ -1,3 +1,5 @@
+export type AddressAutocompleteScope = "employee" | "location";
+
 export interface AddressSuggestion {
   id: string;
   label: string;

@@ -1,7 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  capabilityForAddressAutocompleteScope,
+  parseAddressAutocompleteScope,
+} from "@/modules/address-autocomplete/scope";
 import { searchGeoapifyAddresses } from "@/modules/address-autocomplete/services/geoapify";
 
 export async function GET(request: Request) {
+  const requestUrl = new URL(request.url);
+  const scope = parseAddressAutocompleteScope(requestUrl.searchParams.get("scope"));
+  if (!scope) return Response.json({ error: "Invalid address autocomplete scope." }, { status: 400 });
+
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
@@ -18,15 +26,15 @@ export async function GET(request: Request) {
     return Response.json({ error: "Active organization required." }, { status: 403 });
   }
 
-  const { data: canManageEmployees, error: permissionError } = await supabase.rpc("has_permission", {
+  const { data: hasRequiredPermission, error: permissionError } = await supabase.rpc("has_permission", {
     target_organization_id: membership.organization_id,
-    requested_capability: "employee.manage",
+    requested_capability: capabilityForAddressAutocompleteScope(scope),
   });
-  if (permissionError || !canManageEmployees) {
-    return Response.json({ error: "Employee management permission required." }, { status: 403 });
+  if (permissionError || !hasRequiredPermission) {
+    return Response.json({ error: "Address autocomplete permission required." }, { status: 403 });
   }
 
-  const query = new URL(request.url).searchParams.get("query")?.trim() ?? "";
+  const query = requestUrl.searchParams.get("query")?.trim() ?? "";
   if (query.length < 3) return Response.json({ enabled: true, suggestions: [] });
   if (query.length > 200) {
     return Response.json({ error: "Address query is too long." }, { status: 400 });

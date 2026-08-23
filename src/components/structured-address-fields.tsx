@@ -1,18 +1,43 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { AddressAutocompleteResponse, AddressSuggestion } from "@/modules/address-autocomplete/types";
+import type {
+  AddressAutocompleteResponse,
+  AddressAutocompleteScope,
+  AddressSuggestion,
+} from "@/modules/address-autocomplete/types";
 
 type Availability = "unknown" | "disabled";
 
-export function AddressFields() {
+interface AddressFieldNames {
+  streetAddress: string;
+  addressLine2?: string;
+  city: string;
+  stateProvince: string;
+  postalCode: string;
+  country?: string;
+}
+
+interface StructuredAddressFieldsProps {
+  scope: AddressAutocompleteScope;
+  fieldNames: AddressFieldNames;
+  defaultCountry?: string;
+  required?: boolean;
+}
+
+export function StructuredAddressFields({
+  scope,
+  fieldNames,
+  defaultCountry = "",
+  required = false,
+}: StructuredAddressFieldsProps) {
   const listboxId = useId();
   const helpId = useId();
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
   const [stateProvince, setStateProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState(defaultCountry);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
@@ -28,16 +53,15 @@ export function AddressFields() {
       suppressNextLookup.current = false;
       return;
     }
-    if (availability === "disabled" || query.length < 3) {
-      return;
-    }
+    if (availability === "disabled" || query.length < 3) return;
 
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       setLoading(true);
       setMessage("");
       try {
-        const response = await fetch(`/api/address-autocomplete?query=${encodeURIComponent(query)}`, {
+        const search = new URLSearchParams({ query, scope });
+        const response = await fetch(`/api/address-autocomplete?${search.toString()}`, {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("Address suggestions are unavailable.");
@@ -63,7 +87,7 @@ export function AddressFields() {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [availability, streetAddress]);
+  }, [availability, scope, streetAddress]);
 
   function selectSuggestion(suggestion: AddressSuggestion) {
     suppressNextLookup.current = true;
@@ -71,7 +95,7 @@ export function AddressFields() {
     setCity(suggestion.city);
     setStateProvince(suggestion.stateProvince);
     setPostalCode(suggestion.postalCode);
-    setCountry(suggestion.country || "United States");
+    setCountry(suggestion.country || defaultCountry);
     setSuggestions([]);
     setOpen(false);
     setActiveIndex(-1);
@@ -101,12 +125,13 @@ export function AddressFields() {
   return (
     <>
       <div className="field address-autocomplete-field">
-        <label htmlFor="streetAddress">Street address</label>
+        <label htmlFor={fieldNames.streetAddress}>Street address</label>
         <div className="address-autocomplete-control">
           <input
-            id="streetAddress"
-            name="streetAddress"
+            id={fieldNames.streetAddress}
+            name={fieldNames.streetAddress}
             autoComplete="address-line1"
+            required={required}
             value={streetAddress}
             onChange={(event) => {
               const value = event.target.value;
@@ -156,30 +181,37 @@ export function AddressFields() {
         </span>
         {providerEnabled ? <a className="address-attribution" href="https://www.geoapify.com/" target="_blank" rel="noreferrer">Powered by Geoapify</a> : null}
       </div>
-      <div className="field">
-        <label htmlFor="addressLine2">Address line 2</label>
-        <input id="addressLine2" name="addressLine2" autoComplete="address-line2" />
-        <span className="help">Apartment, suite, unit, or building (optional).</span>
-      </div>
+
+      {fieldNames.addressLine2 ? (
+        <div className="field">
+          <label htmlFor={fieldNames.addressLine2}>Address line 2</label>
+          <input id={fieldNames.addressLine2} name={fieldNames.addressLine2} autoComplete="address-line2" />
+          <span className="help">Apartment, suite, unit, or building (optional).</span>
+        </div>
+      ) : null}
+
       <div className="two-col">
         <div className="field">
-          <label htmlFor="city">City</label>
-          <input id="city" name="city" autoComplete="address-level2" value={city} onChange={(event) => setCity(event.target.value)} />
+          <label htmlFor={fieldNames.city}>City</label>
+          <input id={fieldNames.city} name={fieldNames.city} autoComplete="address-level2" required={required} value={city} onChange={(event) => setCity(event.target.value)} />
         </div>
         <div className="field">
-          <label htmlFor="stateProvince">State / province</label>
-          <input id="stateProvince" name="stateProvince" autoComplete="address-level1" value={stateProvince} onChange={(event) => setStateProvince(event.target.value)} />
+          <label htmlFor={fieldNames.stateProvince}>State / province</label>
+          <input id={fieldNames.stateProvince} name={fieldNames.stateProvince} autoComplete="address-level1" required={required} value={stateProvince} onChange={(event) => setStateProvince(event.target.value)} />
         </div>
       </div>
-      <div className="two-col">
+
+      <div className={fieldNames.country ? "two-col" : undefined}>
         <div className="field">
-          <label htmlFor="postalCode">Postal code</label>
-          <input id="postalCode" name="postalCode" autoComplete="postal-code" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} />
+          <label htmlFor={fieldNames.postalCode}>Postal code</label>
+          <input id={fieldNames.postalCode} name={fieldNames.postalCode} autoComplete="postal-code" required={required} value={postalCode} onChange={(event) => setPostalCode(event.target.value)} />
         </div>
-        <div className="field">
-          <label htmlFor="country">Country</label>
-          <input id="country" name="country" autoComplete="country-name" value={country} onChange={(event) => setCountry(event.target.value)} />
-        </div>
+        {fieldNames.country ? (
+          <div className="field">
+            <label htmlFor={fieldNames.country}>Country</label>
+            <input id={fieldNames.country} name={fieldNames.country} autoComplete="country-name" required={required} value={country} onChange={(event) => setCountry(event.target.value)} />
+          </div>
+        ) : null}
       </div>
     </>
   );

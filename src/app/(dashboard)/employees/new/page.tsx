@@ -10,7 +10,11 @@ export default async function NewEmployeePage({ searchParams }: { searchParams: 
   const params = await searchParams;
   return (
     <>
-      <PageHeader title="Add employee" description="A login can be linked later; it is not required." />
+      <PageHeader
+        title="Add employee"
+        description="A login can be linked later; it is not required."
+        action={<Link className="button ghost" href="/employees/new/wizard">Guided setup instead</Link>}
+      />
       <section className="panel form-panel employee-form-panel">
         <MessageBanner error={params.error} />
         <form action={createEmployee} className="form-grid employee-form">

@@ -926,3 +926,24 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Employee onboarding wizard */
+.wizard-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .75rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+.wizard-steps li {
+  padding: .3rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface-subtle);
+  font-size: .78rem;
+  font-weight: 700;
+}
+.wizard-steps li.done { color: var(--brand-dark); border-color: #c7d2fe; background: var(--brand-soft); }
+.wizard-steps li[aria-current="step"] { color: white; border-color: transparent; background: linear-gradient(180deg, #5b55e7, #4840d1); }

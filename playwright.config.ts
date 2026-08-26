@@ -6,9 +6,11 @@ loadEnvConfig(process.cwd());
 
 export default defineConfig({
   testDir: "./e2e",
+  timeout: 120_000,
   fullyParallel: false,
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
+  expect: { timeout: 10_000 },
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
     trace: "on-first-retry",

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
         <div className="stat"><span className="muted">Role</span><span className="stat-value compact">{context.roleName}</span></div>
       </section>
       <section className="section-grid dashboard-actions" aria-label="Dashboard shortcuts">
-        <div className="panel"><h2>Build your workforce</h2><p className="muted">Add employees without requiring them to have login accounts.</p><Link className="button" href="/employees/new">Add employee</Link></div>
+        <div className="panel"><h2>Build your workforce</h2><p className="muted">Use guided onboarding for workplace setup, or keep the quick employee workflow.</p><div className="button-row"><Link className="button" href="/employees/onboard">Onboard employee</Link><Link className="button secondary" href="/employees/new">Add employee</Link></div></div>
         <div className="panel"><h2>Structure your workplace</h2><p className="muted">Create locations first, then optionally attach departments to them.</p><div className="button-row"><Link className="button secondary" href="/locations/new">Add location</Link><Link className="button secondary" href="/departments/new">Add department</Link></div></div>
       </section>
     </>

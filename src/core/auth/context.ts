@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { MembershipRole, Organization } from "@/types/database";
@@ -17,12 +18,24 @@ export async function requireUser() {
 
 export async function getOrganizationContext(): Promise<OrganizationContext | null> {
   const { supabase } = await requireUser();
-  const { data: membership } = await supabase
-    .from("organization_memberships")
-    .select("organization_id, membership_role, role_id")
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+
+  const loadMembership = () =>
+    supabase
+      .from("organization_memberships")
+      .select("organization_id, membership_role, role_id")
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+  let membership = (await loadMembership()).data;
+
+  // Invited employees may sign in directly; link them on first authenticated load.
+  if (!membership) {
+    const { data: linked } = await supabase.rpc("accept_employee_invitation" as any);
+    if (linked) {
+      membership = (await loadMembership()).data;
+    }
+  }
 
   if (!membership) return null;
 

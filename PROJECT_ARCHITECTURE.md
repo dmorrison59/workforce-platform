@@ -354,6 +354,27 @@ CORE → Crews → Jobs → GPS / Field
 Scheduling + Availability + Labor + related constraints → AI Scheduling
 ```
 
+## Employee Onboarding Coordinator
+
+The optional `/employees/onboard` wizard is a workflow coordinator, not a new business-logic
+layer. Its in-progress values live only in client memory, and no employee record is created
+until the manager confirms the final review. This avoids orphaned employee records without
+introducing a generic draft-workflow table or a new database migration.
+
+Final confirmation calls the existing employee-creation RPC through the shared employee
+service. After the employee succeeds, selected optional operations run independently through
+the authoritative effective-dated crew-membership and scheduling services. A crew or first-
+shift failure never hides or rolls back an employee that was already created; the completion
+screen reports each outcome and links the manager to the existing Crews or Schedule workflow
+for retry. First shifts always return the weekly schedule to draft and require intentional
+publication through the existing Schedule screen.
+
+Employee records currently have no primary location or department relationship, so workplace
+choices are tenant-validated and used to prepare the onboarding flow but are not stored as
+duplicate employee fields. Authentication accounts remain separate from employee records.
+Because there is no safe manager-driven invitation service, "Give app access now" produces an
+explicit pending status and never asks a manager to create another user's password.
+
 ## Version 1 Scope
 
 Version 1 should include only:

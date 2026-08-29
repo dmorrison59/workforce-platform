@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 
 export type InvitationOutcome =
   | { kind: "sent"; email: string }
@@ -76,6 +77,13 @@ export async function inviteEmployeeById(args: {
     .update({ app_access_status: "invited", updated_at: now })
     .eq("id", employee.id);
   if (employeeError) return { kind: "error", message: employeeError.message };
+  await recordEvent({
+    organizationId,
+    eventType: EVENT_TYPES.invitationSent,
+    actorProfileId: actingProfileId,
+    subjectEmployeeId: employee.id,
+    payload: { email: employee.email },
+  });
 
   return { kind: "sent", email: employee.email };
 }

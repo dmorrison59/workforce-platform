@@ -1,5 +1,5 @@
 "use server";
-
+import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { requireOrganization, requireUser } from "@/core/auth/context";
@@ -73,7 +73,12 @@ export async function onboardEmployee(
   } catch (error) {
     return { outcome: "error", message: errorMessage(error) };
   }
-
+  await recordEvent({
+    organizationId: context.organization.id,
+    eventType: EVENT_TYPES.employeeCreated,
+    subjectEmployeeId: employeeId,
+    payload: { source: "onboarding-wizard" },
+  });
   const crew: FollowOnResult = orchestration.data.crewId
     ? { state: "pending", message: "Crew assignment is being completed." }
     : { state: "skipped", message: "Crew assignment was skipped." };

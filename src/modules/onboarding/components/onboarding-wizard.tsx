@@ -282,7 +282,7 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
           <div className="choice-grid">
             <label className={appAccess === "give-now" ? "choice-card selected" : "choice-card"}>
               <input type="radio" name="appAccess" value="give-now" checked={appAccess === "give-now"} onChange={(event) => setAppAccess(event.target.value)} required />
-              <span><strong>Give app access now</strong><small>Records a pending-access outcome until a secure invitation workflow is available.</small></span>
+              <span><strong>Give app access now</strong><small>Sends a secure invitation email to the employee. They set their own password.</small></span>
             </label>
             <label className={appAccess === "later" ? "choice-card selected" : "choice-card"}>
               <input type="radio" name="appAccess" value="later" checked={appAccess === "later"} onChange={(event) => setAppAccess(event.target.value)} />

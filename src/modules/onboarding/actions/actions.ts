@@ -12,6 +12,9 @@ import { weekStartFor } from "@/modules/scheduling/lib/dates";
 import { createShift, createWeeklySchedule } from "@/modules/scheduling/services/scheduling-service";
 import type { FollowOnResult, OnboardingActionState } from "@/modules/onboarding/types";
 import { onboardingOrchestrationSchema } from "@/modules/onboarding/validation/schema";
+import { inviteEmployeeById } from "@/core/invitations/invitation-service";
+import { getPublicEnvironment } from "@/lib/env";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function errorMessage(error: unknown) {
   if (error instanceof ZodError) return error.issues[0]?.message ?? "Check the onboarding details.";
@@ -36,17 +39,6 @@ async function validateWorkSetup(
   if (department.data.location_id && department.data.location_id !== locationId) {
     throw new Error("The selected department does not belong to the selected location.");
   }
-}
-
-function appAccessResult(choice: "give-now" | "later" | "none"): FollowOnResult {
-  if (choice === "give-now") {
-    return {
-      state: "pending",
-      message: "App access is pending. A safe manager-driven invitation flow is not available yet; no password was created or exposed.",
-    };
-  }
-  if (choice === "later") return { state: "skipped", message: "App access was deferred for later setup." };
-  return { state: "skipped", message: "This employee does not need app access." };
 }
 
 export async function onboardEmployee(
@@ -147,7 +139,58 @@ export async function onboardEmployee(
       state: "skipped",
       message: "No workplace choice was recorded. Employee records do not currently have a primary location or department relationship.",
     };
-  const hasFollowOnFailure = crew.state === "failed" || shift.state === "failed";
+
+  const appAccess: FollowOnResult = orchestration.data.appAccess === "give-now"
+    ? { state: "pending", message: "Sending app invitation…" }
+    : orchestration.data.appAccess === "later"
+      ? { state: "skipped", message: "App access was deferred for later setup." }
+      : { state: "skipped", message: "This employee does not need app access." };
+
+  if (orchestration.data.appAccess === "give-now") {
+    try {
+      const { supabase, user } = await requireUser();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+      const result = await inviteEmployeeById({
+        organizationId: context.organization.id,
+        employeeId,
+        actingProfileId: profile?.id ?? null,
+        userSupabase: supabase,
+        admin: createAdminClient(),
+        siteUrl: getPublicEnvironment().NEXT_PUBLIC_SITE_URL,
+      });
+      switch (result.kind) {
+        case "sent":
+          appAccess.state = "success";
+          appAccess.message = `Invitation email sent to ${result.email}.`;
+          break;
+        case "already-has-access":
+          appAccess.state = "success";
+          appAccess.message = `${result.email} already has app access.`;
+          break;
+        case "email-already-registered":
+          appAccess.state = "success";
+          appAccess.message = `${result.email} already has an account — they can sign in and will be linked automatically.`;
+          break;
+        case "not-found":
+          appAccess.state = "failed";
+          appAccess.message = "Employee was created, but invitation failed: employee not found.";
+          break;
+        case "error":
+          appAccess.state = "failed";
+          appAccess.message = `Employee was created, but invitation failed: ${result.message}`;
+          break;
+      }
+    } catch (error) {
+      appAccess.state = "failed";
+      appAccess.message = `Employee was created, but invitation failed: ${errorMessage(error)}`;
+    }
+  }
+
+  const hasFollowOnFailure = crew.state === "failed" || shift.state === "failed" || appAccess.state === "failed";
   revalidatePath("/employees");
   revalidatePath("/crews");
   revalidatePath("/schedule");
@@ -161,7 +204,7 @@ export async function onboardEmployee(
     employeeId,
     employeeName: `${employee.data.firstName} ${employee.data.lastName}`,
     workSetup,
-    appAccess: appAccessResult(orchestration.data.appAccess),
+    appAccess,
     crew,
     shift,
     schedulePath,

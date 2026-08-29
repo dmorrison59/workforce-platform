@@ -28,7 +28,7 @@ async function createOwnerWorkspace(page: Page, unique: string) {
 async function completeEmployeeDetails(page: Page, unique: string, firstName: string) {
   await page.getByLabel("First name").fill(firstName);
   await page.getByLabel("Last name").fill("Newhire");
-  await page.getByLabel("Email").fill(`${firstName.toLowerCase()}-${unique}@example.test`);
+  await page.getByRole("textbox", { name: "Email" }).fill(`${firstName.toLowerCase()}-${unique}@example.test`);
   await page.getByLabel("Phone").fill("555-0100");
   await page.getByLabel("Employee number").fill(`W-${unique.slice(-5)}`);
   await page.getByLabel("Hire date", { exact: true }).fill(nextMonday());

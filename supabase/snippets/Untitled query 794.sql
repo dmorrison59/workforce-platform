@@ -1,0 +1,1 @@
+select event_type, payload, created_at from domain_events order by created_at desc;

@@ -1,5 +1,5 @@
 "use server";
-
+import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { requireOrganization } from "@/core/auth/context";
@@ -67,6 +67,11 @@ export async function approveTimeEntryAction(formData: FormData) {
   await requireCapability(context.organization.id, "timeclock.edit");
   try {
     await timeClock.approveTimeEntry(formValues(formData));
+    await recordEvent({
+      organizationId: context.organization.id,
+      eventType: EVENT_TYPES.timeEntryApproved,
+      payload: { entryId: String(formData.get("entryId") ?? "") },
+    });
   } catch (error) {
     redirectWithMessage("/timesheets", "error", errorMessage(error));
   }

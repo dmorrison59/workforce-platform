@@ -1,5 +1,5 @@
 "use server";
-
+import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
@@ -99,7 +99,20 @@ export async function copyWeekAction(formData: FormData) {
 }
 
 export async function publishScheduleAction(formData: FormData) {
-  await mutation(formData, "schedule.publish", () => scheduling.publishSchedule(formValues(formData)), "Schedule published.");
+  const context = await requireOrganization();
+  const values = formValues(formData);
+  await mutation(formData, "schedule.publish", async () => {
+    await scheduling.publishSchedule(values);
+    await recordEvent({
+      organizationId: context.organization.id,
+      eventType: EVENT_TYPES.schedulePublished,
+      payload: {
+        scheduleId: values.scheduleId ?? "",
+        locationId: values.returnLocation ?? "",
+        weekStart: values.returnWeek ?? "",
+      },
+    });
+  }, "Schedule published.");
 }
 
 export async function markShiftOpenAction(formData: FormData) {

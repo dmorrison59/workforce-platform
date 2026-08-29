@@ -1,5 +1,5 @@
 "use server";
-
+import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { requireOrganization } from "@/core/auth/context";
@@ -27,10 +27,16 @@ function refreshCoverage() {
 export async function requestOpenShiftAction(formData: FormData) {
   const context = await requireOrganization();
   await requireCapability(context.organization.id, "open_shift.request");
+  const values = formValues(formData);
   try {
     await createMyOpenShiftRequest({
-      ...formValues(formData),
+      ...values,
       organizationId: context.organization.id,
+    });
+    await recordEvent({
+      organizationId: context.organization.id,
+      eventType: EVENT_TYPES.coverageRequested,
+      payload: { shiftId: values.shiftId ?? "" },
     });
   } catch (error) {
     redirectWithMessage("/open-shifts", "error", errorMessage(error));

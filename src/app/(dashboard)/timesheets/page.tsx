@@ -49,7 +49,11 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: P
     <>
       <PageHeader title="Weekly Timesheets" description={`${week} through ${addDays(week, 6)}`} />
       <MessageBanner error={params.error} message={params.message} />
-      <div className="button-row timesheet-nav"><Link className="button ghost" href={`/timesheets?week=${addDays(week, -7)}`}>Previous week</Link><Link className="button ghost" href={`/timesheets?week=${addDays(week, 7)}`}>Next week</Link></div>
+<div className="button-row timesheet-nav">
+  <Link className="button ghost" href={`/timesheets?week=${addDays(week, -7)}`}>Previous week</Link>
+  <Link className="button ghost" href={`/timesheets?week=${addDays(week, 7)}`}>Next week</Link>
+  <a className="button secondary" href={`/api/timesheets/export?week=${week}`} download>Download CSV</a>
+</div>
       {employees?.length ? <section className="panel weekly-totals"><h2>Weekly totals</h2><div className="time-metrics">{employees.map((employee) => <span key={employee.id}>{employee.first_name} {employee.last_name} <strong>{formatDuration(totalsByEmployee.get(employee.id) ?? 0)}</strong></span>)}</div></section> : null}
       <section className="timesheet-list manager-timesheets">
         {entries.length ? entries.map((entry) => {

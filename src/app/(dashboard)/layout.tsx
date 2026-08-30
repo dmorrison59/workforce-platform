@@ -53,9 +53,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="dashboard-shell">
       <aside className="sidebar">
         <div className="sidebar-heading">
-          <Link className="brand-lockup" href="/dashboard" aria-label="Workforce Core dashboard">
-            <span className="brand-mark" aria-hidden="true">W</span>
-            <span className="brand">Workforce Core</span>
+          <Link className="brand-lockup" href="/dashboard" aria-label="YardClock dashboard">
+            <span className="brand-mark" aria-hidden="true">Y</span>
+            <span className="brand">YardClock</span>
           </Link>
           <div className="org-name"><span>{context.organization.name}</span><span className="role-pill">{context.roleName}</span></div>
         </div>

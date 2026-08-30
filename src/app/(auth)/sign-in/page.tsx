@@ -7,7 +7,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   return (
     <section className="auth-card">
-      <span className="eyebrow">Workforce Core</span>
+      <span className="eyebrow">YardClock</span>
       <h1 className="title">Welcome back</h1>
       <p className="muted">Sign in to manage your organization.</p>
       <MessageBanner error={params.error} message={params.message} />
@@ -16,7 +16,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         <FormField label="Password" name="password" type="password" autoComplete="current-password" required />
         <button className="button" type="submit">Sign in</button>
       </form>
-      <p className="muted">New to Workforce Core? <Link href="/sign-up"><strong>Create an account</strong></Link></p>
+      <p className="muted">New to YardClock? <Link href="/sign-up"><strong>Create an account</strong></Link></p>
     </section>
   );
 }

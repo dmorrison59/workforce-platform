@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Workforce Core", template: "%s | Workforce Core" },
-  description: "Secure workforce management foundation for small businesses.",
+  title: { default: "YardClock", template: "%s | YardClock" },
+  description: "YardClock: scheduling, GPS time clock, and crew tools for small field businesses.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

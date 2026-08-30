@@ -7,7 +7,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   return (
     <section className="auth-card">
-      <span className="eyebrow">Workforce Core</span>
+      <span className="eyebrow">YardClock</span>
       <h1 className="title">Create your account</h1>
       <p className="muted">Start with a secure organization workspace. Employee accounts stay separate from employee records.</p>
       <MessageBanner error={params.error} />

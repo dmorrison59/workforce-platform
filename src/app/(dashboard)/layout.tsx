@@ -27,6 +27,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ]);
   const navigation = [
     { label: "Dashboard", href: "/dashboard", group: "Workspace" },
+    { label: "Dashboard", href: "/dashboard", group: "Workspace" },
+{ label: "Help", href: "/help", group: "Workspace" },
     { label: "Employees", href: "/employees", group: "Workforce" },
     { label: "Locations", href: "/locations", group: "Workforce" },
     { label: "Departments", href: "/departments", group: "Workforce" },

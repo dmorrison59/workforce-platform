@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ]);
   const navigation = [
     { label: "Dashboard", href: "/dashboard", group: "Workspace" },
-{ label: "Help", href: "/help", group: "Workspace" },
+    { label: "Help", href: "/help", group: "Workspace" },
     { label: "Employees", href: "/employees", group: "Workforce" },
     { label: "Locations", href: "/locations", group: "Workforce" },
     { label: "Departments", href: "/departments", group: "Workforce" },
@@ -47,6 +47,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ...(canManageJobs ? [{ label: "Jobs", href: "/jobs", group: "Fieldwork" }] : []),
     ...(canViewJobs && !canManageJobs ? [{ label: "My Jobs", href: "/my-jobs", group: "My work" }] : []),
     ...(canManageFieldClock ? [{ label: "Field Clock", href: "/field-clock", group: "Fieldwork" }] : []),
+    { label: "Billing", href: "/billing", group: "Workspace" },
     { label: "Settings", href: "/settings", group: "Workspace" },
   ];
   return (

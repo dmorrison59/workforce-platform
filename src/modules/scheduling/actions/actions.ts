@@ -1,4 +1,5 @@
 "use server";
+import { processPendingNotifications } from "@/core/notifications/notification-service";
 import { EVENT_TYPES, recordEvent } from "@/core/events/event-service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -112,7 +113,8 @@ export async function publishScheduleAction(formData: FormData) {
         weekStart: values.returnWeek ?? "",
       },
     });
-  }, "Schedule published.");
+      await processPendingNotifications();
+    }, "Schedule published.");  
 }
 
 export async function markShiftOpenAction(formData: FormData) {

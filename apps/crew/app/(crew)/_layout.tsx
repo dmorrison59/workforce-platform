@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { colors } from "@/theme";
 import { CrewClockProvider } from "@/state/clock-context";
 import { CrewHoursProvider } from "@/state/hours-context";
+import { CrewTimeOffProvider } from "@/state/time-off-context";
 
 export default function CrewLayout() {
   const auth = useAuth();
@@ -16,6 +17,7 @@ export default function CrewLayout() {
   return (
     <CrewClockProvider key={`${auth.crewContext.user.id}:${auth.crewContext.organization.id}:${auth.crewContext.employee.id}`} context={auth.crewContext}>
     <CrewHoursProvider context={auth.crewContext}>
+    <CrewTimeOffProvider context={auth.crewContext}>
     <Tabs
       initialRouteName="today"
       screenOptions={{
@@ -33,6 +35,7 @@ export default function CrewLayout() {
       <Tabs.Screen name="hours" options={{ title: "Hours" }} />
       <Tabs.Screen name="time-off" options={{ title: "Time Off" }} />
     </Tabs>
+    </CrewTimeOffProvider>
     </CrewHoursProvider>
     </CrewClockProvider>
   );

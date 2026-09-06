@@ -1,6 +1,6 @@
-# YardClock Crew — Mobile Gate 3
+# YardClock Crew — Mobile Gate 4
 
-`apps/crew` is a separate Expo/React Native workspace for the employee-facing YardClock experience. The existing Next.js application remains the manager application at the repository root. Gates 0–3 provide secure authentication, Today/My Schedule, Clock In/Out with one-time foreground location, and a read-only employee Hours timesheet. Time Off remains a placeholder; there is no time editing, break controls, continuous/background location, route tracking, push, billing, or schedule editing.
+`apps/crew` is a separate Expo/React Native workspace for the employee-facing YardClock experience. The existing Next.js application remains the manager application at the repository root. Gates 0–4 provide secure authentication, Today/My Schedule, Clock In/Out with one-time foreground location, a read-only employee Hours timesheet, and employee Time Off self-service. There is no manager approval UI, time editing, break controls, continuous/background location, route tracking, push, billing, or schedule editing.
 
 ## Prerequisites and install
 
@@ -75,6 +75,7 @@ Today greets the linked employee and shows the organization, published work, cur
 - Supabase Auth and the `handle_new_auth_user` profile trigger
 - `profiles`, `organizations`, `organization_memberships`, `roles`, and `employees`
 - `current_profile_id()`, `accept_employee_invitation()`, `current_employee_id()`, and `has_permission()`
+- `time_off_requests`, `create_my_time_off_request()`, and `cancel_my_time_off_request()`
 - Existing tenant isolation, table grants, RLS policies, and capability-based roles
 - The checked-in web `Database` TypeScript contract, imported as a type-only dependency and extended locally for the invitation RPC and existing composite shift foreign-key metadata missing from that file
 
@@ -153,6 +154,51 @@ Gate 3 physical-device verification passed on an iPhone (user-confirmed after th
 - Local database/RLS suite: 10 files and 432 assertions passed, including time tracking and mobile clock security. Supabase schema/function lint: no errors.
 - Gate 3 physical-device smoke test: passed on an iPhone (user-confirmed).
 
+## Gate 4 Time Off architecture
+
+- `src/services/crew-time-off.ts` is the only mobile read/mutation path. Each operation validates the Supabase user, re-resolves `current_employee_id(organization_id)`, and rechecks either `timeoff.view_self` or `timeoff.request`. Reads also apply exact organization and employee filters and select only employee-safe fields. Existing grants and RLS independently enforce self-service isolation.
+- New requests use the existing `create_my_time_off_request(organization_id, start_date, end_date, reason)` RPC. The RPC derives the employee from the authenticated profile and always creates a `pending` request; mobile cannot choose an employee, status, review metadata, or manager note.
+- Cancellation uses the existing `cancel_my_time_off_request(request_id)` RPC. Mobile offers the action only for `pending` requests and requires native confirmation. The RPC rechecks ownership/capability and rejects stale, approved, denied, cancelled, foreign-employee, and cross-tenant targets.
+- The backend supports full-day `date` ranges only. Gate 4 does not invent partial-day time fields. Inputs and “today” grouping use the organization timezone, while stored date values remain unchanged calendar dates. The form checks required/real dates, date order, and the existing 2,000-character reason limit before the RPC; PostgreSQL remains authoritative.
+- The list presents the backend’s existing statuses only: Pending, Approved, Denied, and Cancelled. It shows the employee reason and, for decided requests, the manager note already exposed by the existing web employee page. It deliberately omits `reviewed_by` and provides no approve/deny call or manager control.
+- Approved requests continue to feed the unchanged web scheduling warning query. Mobile only displays, submits, and cancels requests; it adds no scheduling rule or schedule mutation.
+- Pull-to-refresh, tab focus, foreground resume, successful submission, and successful cancellation reload authoritative data. Concurrent taps are locked locally, controls show submission/cancellation progress, and backend errors are translated without exposing Supabase/PostgreSQL details.
+
+### Gate 4 authenticated local integration
+
+Set `CREW_LOCAL_TEST_URL`, `CREW_LOCAL_TEST_ANON_KEY`, `CREW_LOCAL_TEST_EMAIL`, `CREW_LOCAL_TEST_PASSWORD`, and `CREW_LOCAL_TIME_OFF_WRITES=1` in the shell, then run:
+
+```powershell
+pnpm --dir apps/crew test tests/time-off.local.test.ts
+```
+
+The test refuses hosted URLs and uses only the authenticated anon client for the assertions. It loads the employee’s requests, creates one uniquely named future request, confirms it reloads as Pending, cancels it, and confirms the Cancelled status. It also verifies cross-employee/cross-tenant reads are empty, direct insert/review-field updates are rejected, an unknown/other cancellation is rejected, and the Employee role cannot approve or deny. Cleanup retries cancellation if the workflow stops after creation.
+
+### Gate 4 iPhone smoke-test checklist
+
+The Gate 4 physical-device smoke test passed on an iPhone using this checklist:
+
+1. Sign in.
+2. Open Time Off.
+3. Confirm existing requests load.
+4. Create a new full-day request and review the confirmation summary.
+5. Confirm it appears as Pending.
+6. Close and reopen the app.
+7. Confirm the request persists.
+8. Cancel the pending request after confirming the native prompt.
+9. Confirm its status updates to Cancelled.
+10. Verify other existing Approved and Denied requests display correctly if test data exists.
+
+### Gate 4 verification
+
+- Mobile TypeScript and zero-warning ESLint: passed.
+- 101 deterministic mobile tests passed; 11 opt-in integration tests were skipped in the normal run.
+- 4 Time Off authenticated-local integration tests and 7 existing Schedule/Clock/Hours integration tests passed against a disposable Employee-role account. The Time Off lifecycle creates and then cancels only a local request.
+- Expo dependency compatibility: passed. Android production export: passed (1,347 modules). Offline Metro returned an Android Expo manifest with HTTP 200 and was then stopped.
+- Existing web TypeScript, zero-warning ESLint, all 94 tests, and the 37-route production build: passed.
+- Local database/RLS suite: 10 files and 432 assertions passed, including employee self-service time-off security. Supabase schema/function lint: no errors.
+- Gate 4 physical-device smoke test: passed on an iPhone (user-confirmed).
+
 ## Gate 1 schedule architecture
 
 - `src/services/crew-schedule.ts` is the single mobile read path. It validates the authenticated user, rechecks `current_employee_id()` and `has_permission('schedule.view')`, and requests only necessary shift/detail columns.
@@ -218,13 +264,13 @@ The physical iPhone smoke test passed. Maps-app behavior can still vary by insta
 
 ## Current limitations
 
-- Time Off is still a navigation placeholder. Hours is read-only and cannot edit or submit corrections.
+- Time Off supports employee full-day requests and pending cancellation only. It does not support partial-day requests or manager decisions. Hours remains read-only and cannot edit or submit corrections.
 - No account creation, invitation sending, password reset, or password-setting UI exists in mobile.
 - The existing manager invitation must be completed and a password established through the existing YardClock/Supabase flow before email/password mobile sign-in can succeed.
 - The shell selects the oldest active organization membership. Organization switching is not part of Gate 0.
 - No offline business-data cache is implemented. Only the authentication session persists.
 - Foreground GPS is captured only at explicit punches. No background GPS, push notifications, or native production builds are configured.
-- No database migration or RLS change was required for Mobile Gate 3; it reuses the existing web time-tracking backend and the additive Gate 2 mobile punch evidence.
+- No database migration or RLS change was required for Mobile Gates 3–4; they reuse the existing web time-tracking and employee time-off backends plus the additive Gate 2 mobile punch evidence.
 - Field-job assignments are not included in Today/My Schedule because they are not linked to shifts; the screens represent published schedule work only.
 - As with the web app, existing manager/labor privileges are not reduced by signing into mobile. The app's query is narrower, but it does not create a new restricted backend role.
 - Gate 0's nested workspace has different web/mobile React versions. Keep installs isolated and verify native builds when upgrading Expo; no web React dependency was changed here.

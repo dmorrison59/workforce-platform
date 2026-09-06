@@ -1,5 +1,5 @@
 begin;
-select plan(38);
+select plan(46);
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -234,6 +234,55 @@ select throws_ok(
   ) $$,
   'P0001', 'Employee must be active and belong to the shift organization', 'Cross-tenant employee assignment is rejected'
 );
+
+-- Mobile Gate 1: the joined, read-only projection uses existing RLS. Fixtures
+-- below are transactional only; no production policy/schema changes are needed.
+set local "request.jwt.claim.sub" = 'b4000000-0000-0000-0000-000000000001';
+select public.publish_weekly_schedule((select id from public.schedules where week_start = '2026-08-24'));
+set local "request.jwt.claim.sub" = 'a4000000-0000-0000-0000-000000000002';
+select is((select count(*)::integer from public.shifts where employee_id = 'b4300000-0000-0000-0000-000000000001'), 0, 'Mobile employee cannot read published foreign-tenant shifts by known employee UUID');
+select is((select count(*)::integer from public.schedules where location_id = 'b4100000-0000-0000-0000-000000000001'), 0, 'Mobile employee cannot read published foreign-tenant schedules');
+select is((
+  select count(*)::integer from public.shifts shift
+  join public.schedules schedule on (schedule.id, schedule.organization_id, schedule.location_id) = (shift.schedule_id, shift.organization_id, shift.location_id)
+  where shift.employee_id = public.current_employee_id(shift.organization_id)
+    and shift.status = 'published' and schedule.status = 'published'
+    and shift.start_at < '2026-08-31T04:00:00Z' and shift.end_at > '2026-08-24T04:00:00Z'
+), 2, 'Mobile joined weekly read returns exactly the two own published shifts');
+select is((
+  select count(*)::integer from public.shifts shift
+  left join public.locations location on (location.id, location.organization_id) = (shift.location_id, shift.organization_id)
+  where shift.employee_id = public.current_employee_id(shift.organization_id)
+    and location.address = '1 A Street'
+), 2, 'Employee can resolve the correct location address through composite tenant foreign keys');
+
+reset role;
+update public.shifts set status = 'published'
+where id = (
+  select shift.id from public.shifts shift
+  join public.schedules schedule on schedule.id = shift.schedule_id
+  where schedule.week_start = '2026-08-31' and shift.employee_id = 'a4300000-0000-0000-0000-000000000001'
+  order by shift.start_at limit 1
+);
+set local role authenticated;
+set local "request.jwt.claim.sub" = 'a4000000-0000-0000-0000-000000000002';
+select is((select count(*)::integer from public.shifts where start_at >= '2026-08-31'), 0, 'Employee RLS hides a published child of an unpublished parent');
+set local "request.jwt.claim.sub" = 'a4000000-0000-0000-0000-000000000001';
+select is((select count(*)::integer from public.shifts where status = 'published' and start_at >= '2026-08-31'), 1, 'Privileged fixture confirms the published child exists');
+select is((
+  select count(*)::integer from public.shifts shift
+  join public.schedules schedule on (schedule.id, schedule.organization_id, schedule.location_id) = (shift.schedule_id, shift.organization_id, shift.location_id)
+  where shift.employee_id = 'a4300000-0000-0000-0000-000000000001'
+    and shift.status = 'published' and schedule.status = 'published'
+), 2, 'Mobile parent-publication query also excludes that child for privileged accounts');
+reset role;
+delete from public.role_permissions grant_row using public.roles role, public.permissions permission
+where grant_row.role_id = role.id and grant_row.permission_id = permission.id
+  and role.name = 'Employee' and permission.capability = 'schedule.view'
+  and role.organization_id = (select id from public.organizations where slug = 'schedule-company-a');
+set local role authenticated;
+set local "request.jwt.claim.sub" = 'a4000000-0000-0000-0000-000000000002';
+select is((select count(*)::integer from public.shifts where employee_id = 'a4300000-0000-0000-0000-000000000001'), 0, 'Revoking schedule.view hides assigned shifts at the database boundary');
 
 select * from finish();
 rollback;

@@ -10,6 +10,7 @@ export default defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    "apps/crew/**",
     "supabase/.temp/**",
     "supabase/.branches/**",
   ]),

@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "YardClock Crew",
+    "slug": "yardclock-crew",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "yardclock-crew",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yardclock.crew"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.yardclock.crew",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-location", {
+        "locationWhenInUsePermission": "YardClock uses your location only when you tap Clock In or Clock Out.",
+        "isIosBackgroundLocationEnabled": false,
+        "isAndroidBackgroundLocationEnabled": false,
+        "isAndroidForegroundServiceEnabled": false
+      }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

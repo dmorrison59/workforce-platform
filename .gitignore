@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+/apps/crew/node_modules
 /.pnp
 .pnp.*
 
@@ -9,10 +10,13 @@
 /playwright-report
 /.next
 /out
+/apps/crew/.expo
+/apps/crew/dist
 
 # local environment and Supabase state
 .env*
 !.env.example
+!apps/crew/.env.example
 /supabase/.branches
 /supabase/.temp
 

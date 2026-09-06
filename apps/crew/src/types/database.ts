@@ -2,6 +2,8 @@ import type { Database as WebDatabase } from "@yardclock/database";
 import type { ClockContext, ClockResult, PunchArgs } from "./clock";
 
 type PublicSchema = WebDatabase["public"];
+export type TimeEntry = PublicSchema["Tables"]["time_entries"]["Row"];
+export type TimeBreak = PublicSchema["Tables"]["time_breaks"]["Row"];
 
 // The checked-in web database type predates the invitation RPC. Extend that shared
 // contract locally instead of duplicating the application's table definitions.

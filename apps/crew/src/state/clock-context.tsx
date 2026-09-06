@@ -29,9 +29,14 @@ export function CrewClockProvider({ context, children }: PropsWithChildren<{ con
   return <ClockContext.Provider value={controller}>{children}</ClockContext.Provider>;
 }
 export function useCrewClock() {
+  const state = useCrewClockState();
+  const { refresh } = state;
+  useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
+  return state;
+}
+export function useCrewClockState() {
   const controller = useContext(ClockContext);
   if (!controller) throw new Error("Clock provider is required");
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
-  useFocusEffect(useCallback(() => { void controller.refresh(); }, [controller]));
   return { ...state, refresh: controller.refresh, begin: controller.begin, retry: controller.retry };
 }

@@ -6,5 +6,6 @@ export default defineConfig({
   resolve: { alias: {
     "@": fileURLToPath(new URL("./src", import.meta.url)),
     "@yardclock/database": fileURLToPath(new URL("../../src/types/database.ts", import.meta.url)),
+    "@yardclock/time-calculations": fileURLToPath(new URL("../../src/modules/time-clock/services/calculations.ts", import.meta.url)),
   } },
 });

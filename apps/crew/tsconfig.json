@@ -4,7 +4,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@yardclock/database": ["../../src/types/database.ts"]
+      "@yardclock/database": ["../../src/types/database.ts"],
+      "@yardclock/time-calculations": ["../../src/modules/time-clock/services/calculations.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]

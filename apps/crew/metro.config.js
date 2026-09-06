@@ -9,6 +9,7 @@ config.watchFolders = [
   ...config.watchFolders,
   path.resolve(__dirname, "../../src/core/shared"),
   path.resolve(__dirname, "../../src/modules/scheduling/lib"),
+  path.resolve(__dirname, "../../src/modules/time-clock/services"),
 ];
 
 module.exports = config;

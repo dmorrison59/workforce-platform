@@ -4,6 +4,9 @@ import { createClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadCrewContext } from "../src/services/crew-context";
 import { clockApi } from "../src/services/crew-clock";
+import { loadCrewHours } from "../src/services/crew-hours";
+import { entryWorkedMinutes } from "../src/lib/hours-presentation";
+import { weekStartFor } from "../src/lib/schedule-presentation";
 import type { CrewContext } from "../src/types/crew-context";
 import type { MobileDatabase } from "../src/types/database";
 import type { PendingPunch } from "../src/types/clock";
@@ -32,9 +35,11 @@ describe.skipIf(!url || !key || !email || !password || process.env.CREW_LOCAL_CL
     // Close only the entry created by this test, even on assertion failure.
     if (createdEntry && api) {
       const state = await api.load();
-      if (state.activeEntry?.id === createdEntry) await api.submit({
-        requestId: randomUUID(), kind: "out", expectedEntryId: createdEntry, locationId: state.activeEntry.location_id, shiftId: null, jobId: null,
-      }, null);
+      if (state.activeEntry?.id === createdEntry) {
+        if (state.hasOpenBreak) await client.rpc("end_break", { target_organization_id: context.organization.id });
+        await api.submit({ requestId: randomUUID(), kind: "out", expectedEntryId: createdEntry,
+          locationId: state.activeEntry.location_id, shiftId: null, jobId: null }, null);
+      }
     }
     await client.auth.signOut({ scope: "local" });
   });
@@ -50,6 +55,15 @@ describe.skipIf(!url || !key || !email || !password || process.env.CREW_LOCAL_CL
     expect(replay.timeEntryId).toBe(createdEntry);
     const restored = await clockApi(client, context).load();
     expect(restored.activeEntry?.id).toBe(createdEntry);
+    const week = weekStartFor(new Date(), context.organization.timezone);
+    const openHours = await loadCrewHours(client, context, week);
+    const openEntry = openHours.entries.find((entry) => entry.id === createdEntry);
+    expect(openEntry).toMatchObject({ status: "open", clock_out_at: null });
+    expect(entryWorkedMinutes(openEntry!, openHours.breaks.filter((item) => item.time_entry_id === createdEntry), new Date())).toBeGreaterThanOrEqual(0);
+    expect((await client.rpc("start_break", { target_organization_id: context.organization.id })).error).toBeNull();
+    const breakHours = await loadCrewHours(client, context, week);
+    expect(breakHours.breaks.some((item) => item.time_entry_id === createdEntry && item.end_at === null)).toBe(true);
+    expect((await client.rpc("end_break", { target_organization_id: context.organization.id })).error).toBeNull();
     await expect(api.submit({ ...pending, requestId: randomUUID(), expectedEntryId: createdEntry }, gps)).rejects.toMatchObject({ kind: "stale" });
     const other = await client.from("time_entries").select("id").neq("employee_id", context.employee.id);
     expect(other.error).toBeNull();
@@ -66,6 +80,11 @@ describe.skipIf(!url || !key || !email || !password || process.env.CREW_LOCAL_CL
     expect((await api.submit(out, { ...gps, latitude: 40.713, capturedAt: new Date().toISOString() })).timeEntryId).toBe(createdEntry);
     expect((await api.submit(out, gps)).timeEntryId).toBe(createdEntry);
     expect((await api.load()).activeEntry).toBeNull();
+    const closedHours = await loadCrewHours(client, context, week);
+    const closedEntry = closedHours.entries.find((item) => item.id === createdEntry);
+    expect(closedEntry).toMatchObject({ status: "completed" });
+    expect(closedHours.breaks.some((item) => item.time_entry_id === createdEntry && item.end_at !== null)).toBe(true);
+    expect(entryWorkedMinutes(closedEntry!, closedHours.breaks.filter((item) => item.time_entry_id === createdEntry), new Date())).toBeGreaterThanOrEqual(0);
     const entry = await client.from("time_entries").select("status, clock_in_at, clock_out_at, clock_in_latitude, clock_out_latitude")
       .eq("organization_id", context.organization.id).eq("employee_id", context.employee.id).eq("id", createdEntry!).single();
     expect(entry.error).toBeNull();

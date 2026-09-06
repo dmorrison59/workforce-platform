@@ -1,9 +1,9 @@
 // Pure existing YardClock utilities, with no Next.js/server imports.
 import { orgDayWindow, zonedMidnight } from "../../../../src/core/shared/day-window";
-import { addDays, formatShiftTime, formatWeekDay, weekStartFor } from "../../../../src/modules/scheduling/lib/dates";
+import { addDays, formatShiftTime, formatWeekDay, localDateTimeValue, weekStartFor } from "../../../../src/modules/scheduling/lib/dates";
 import type { CrewShift } from "../services/crew-schedule";
 
-export { addDays, formatShiftTime, formatWeekDay, orgDayWindow, weekStartFor };
+export { addDays, formatShiftTime, formatWeekDay, localDateTimeValue, orgDayWindow, weekStartFor };
 
 export function weekHeading(weekStart: string) {
   const format = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });

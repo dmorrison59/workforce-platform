@@ -1,5 +1,5 @@
-import { localDateTimeValue } from "@/modules/scheduling/lib/dates";
-import type { TimeBreak, TimeEntry } from "@/types/database";
+import { localDateTimeValue } from "../../scheduling/lib/dates";
+import type { TimeBreak, TimeEntry } from "../../../types/database";
 
 type EntryInterval = Pick<TimeEntry, "id" | "clock_in_at" | "clock_out_at" | "status">;
 type BreakInterval = Pick<TimeBreak, "time_entry_id" | "start_at" | "end_at">;

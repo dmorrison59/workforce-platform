@@ -6,6 +6,7 @@ import { ScheduleState } from "@/components/schedule-state";
 import { Card, Screen, sharedStyles } from "@/components/screen";
 import { ShiftCard } from "@/components/shift-card";
 import { ClockStatus } from "@/components/clock-status";
+import { TodayHoursSummary } from "@/components/today-hours-summary";
 import { useCrewSchedule, useScheduleClock } from "@/hooks/use-crew-schedule";
 import { greeting, orgDayWindow, todayWork } from "@/lib/schedule-presentation";
 
@@ -23,6 +24,7 @@ export default function TodayRoute() {
       description={`Your day, at a glance · ${timeZone.replace(/_/g, " ")}`}
       refreshControl={<RefreshControl refreshing={schedule.refreshing} onRefresh={schedule.refresh} />}>
       <ClockStatus timeZone={timeZone} />
+      <TodayHoursSummary timeZone={timeZone} now={now} />
       <ScheduleState status={schedule.status} error={schedule.error} retry={schedule.retry} />
       {schedule.status === "ready" && !work.shifts.length ? (
         <Card><Text style={sharedStyles.cardTitle}>No work scheduled today.</Text>

@@ -9,12 +9,13 @@ export default async function TimeOffRequestsPage({ searchParams }: { searchPara
   const context = await requireOrganization();
   if (!(await hasCapability(context.organization.id, "timeoff.approve"))) redirect("/time-off");
   const { supabase } = await requireUser();
-  const [{ data: requests }, { data: employees }, { data: availability }] = await Promise.all([
+  const [{ data: requests }, { data: employees }, { data: availability }, { data: currentEmployeeId }] = await Promise.all([
     supabase.from("time_off_requests").select("*")
       .eq("organization_id", context.organization.id).eq("status", "pending").order("requested_at"),
     supabase.from("employees").select("*").eq("organization_id", context.organization.id).order("last_name"),
     supabase.from("employee_availability").select("*")
       .eq("organization_id", context.organization.id).order("employee_id").order("day_of_week"),
+    supabase.rpc("current_employee_id", { target_organization_id: context.organization.id }),
   ]);
   const employeeNames = new Map(employees?.map((employee) => [employee.id, `${employee.first_name} ${employee.last_name}`]));
   const messages = await searchParams;
@@ -30,17 +31,23 @@ export default async function TimeOffRequestsPage({ searchParams }: { searchPara
               <strong>{request.start_date} to {request.end_date}</strong>
             </div>
             <p>{request.reason || "No reason provided."}</p>
-            <form action={reviewTimeOffRequestAction} className="form-grid">
-              <input type="hidden" name="requestId" value={request.id} />
-              <div className="field">
-                <label htmlFor={`note-${request.id}`}>Manager note (optional)</label>
-                <textarea id={`note-${request.id}`} name="managerNote" rows={3} maxLength={2000} />
+            {request.employee_id === currentEmployeeId ? (
+              <div className="banner warning" role="note">
+                This is your request. Another authorized manager or owner must review it.
               </div>
-              <div className="button-row">
-                <button className="button" type="submit" name="decision" value="approved">Approve</button>
-                <button className="button ghost" type="submit" name="decision" value="denied">Deny</button>
-              </div>
-            </form>
+            ) : (
+              <form action={reviewTimeOffRequestAction} className="form-grid">
+                <input type="hidden" name="requestId" value={request.id} />
+                <div className="field">
+                  <label htmlFor={`note-${request.id}`}>Manager note (optional)</label>
+                  <textarea id={`note-${request.id}`} name="managerNote" rows={3} maxLength={2000} />
+                </div>
+                <div className="button-row">
+                  <button className="button" type="submit" name="decision" value="approved">Approve</button>
+                  <button className="button ghost" type="submit" name="decision" value="denied">Deny</button>
+                </div>
+              </form>
+            )}
           </article>
         )) : <div className="panel empty">No pending requests.</div>}
       </section>

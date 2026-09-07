@@ -183,6 +183,26 @@ Operational employee and schedule permissions without unrestricted owner/setting
 ### Employee
 Self-service permissions only.
 
+### Built-in role management
+
+The web employee directory lets an Owner change an active linked member between the built-in
+Employee, Manager, and Owner roles. The operation updates only the existing
+`organization_memberships.role_id` and `membership_role`; authentication identities, profiles,
+employee records, employment status, and app-access state remain separate and unchanged.
+
+Authorization remains capability-based. The server and database require `settings.manage`, which
+is granted to the built-in Owner role and not to Manager or Employee. The database resolves the
+requested built-in role inside the current organization, so tenant role identifiers are never
+trusted from the browser. Role changes use the existing role-permission assignments immediately.
+
+Every organization must retain at least one active, internally consistent built-in Owner
+membership. A database trigger protects this invariant for RPC and direct RLS-authorized updates
+or deletions, and an organization-row lock serializes competing final-Owner changes. Membership
+changes are recorded through the existing audit-event mechanism. Custom roles and permission
+editing are outside this gate. The directory exposes role controls only for employee records linked
+to an active organization membership; access-only users without an employee record and inactive or
+unlinked employee records are not editable from this screen.
+
 ## Module Boundaries
 
 ### Module 1 — Scheduling

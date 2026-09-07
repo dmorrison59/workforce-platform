@@ -407,6 +407,14 @@ export interface Database {
         };
         Returns: string;
       };
+      change_organization_membership_role: {
+        Args: {
+          target_organization_id: string;
+          target_membership_id: string;
+          requested_role: string;
+        };
+        Returns: string;
+      };
       has_permission: {
         Args: { target_organization_id: string; requested_capability: string };
         Returns: boolean;
